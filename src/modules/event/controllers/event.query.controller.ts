@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   EVENT_SERVICE_NAME,
+  EVENT_GRPC_METHODS,
   type EventQuery,
   type GetEventResponse,
   type ListEventsQuery,
@@ -10,12 +11,12 @@ import {
 
 @Controller()
 export class EventQueryController {
-  @GrpcMethod(EVENT_SERVICE_NAME, 'getEvent')
+  @GrpcMethod(EVENT_SERVICE_NAME, EVENT_GRPC_METHODS.GET_EVENT)
   async getEvent(_query: EventQuery): Promise<GetEventResponse> {
     throw new Error('Method not implemented.');
   }
 
-  @GrpcMethod(EVENT_SERVICE_NAME, 'listEvents')
+  @GrpcMethod(EVENT_SERVICE_NAME, EVENT_GRPC_METHODS.LIST_EVENTS)
   async listEvents(_query: ListEventsQuery): Promise<ListEventsResponse> {
     throw new Error('Method not implemented.');
   }
