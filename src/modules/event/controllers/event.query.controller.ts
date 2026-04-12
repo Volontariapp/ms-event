@@ -1,23 +1,42 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
-  EVENT_SERVICE_NAME,
-  EVENT_GRPC_METHODS,
-  type EventQuery,
-  type GetEventResponse,
-  type ListEventsQuery,
-  type ListEventsResponse,
-} from '@volontariapp/contracts';
+  GRPC_SERVICES,
+  EVENT_QUERY_METHODS,
+} from '@volontariapp/contracts-nest';
+import { SearchEventsQueryDTO } from '../dto/request/query/search-events.query.dto.js';
+import {
+  GetEventQueryDTO,
+  ListRequirementsQueryDTO,
+} from '../dto/request/query/event.query.dto.js';
+import {
+  GetEventResponseDTO,
+  SearchEventsResponseDTO,
+  ListRequirementsResponseDTO,
+} from '../dto/response/event.response.dto.js';
 
 @Controller()
 export class EventQueryController {
-  @GrpcMethod(EVENT_SERVICE_NAME, EVENT_GRPC_METHODS.GET_EVENT)
-  getEvent(_query: EventQuery): Promise<GetEventResponse> {
-    throw new Error('Method not implemented.');
+  @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.GET_EVENT)
+  getEvent(_data: GetEventQueryDTO): GetEventResponseDTO {
+    return { event: undefined };
   }
 
-  @GrpcMethod(EVENT_SERVICE_NAME, EVENT_GRPC_METHODS.LIST_EVENTS)
-  listEvents(_query: ListEventsQuery): Promise<ListEventsResponse> {
-    throw new Error('Method not implemented.');
+  @GrpcMethod(
+    GRPC_SERVICES.EVENT_QUERY_SERVICE,
+    EVENT_QUERY_METHODS.SEARCH_EVENTS,
+  )
+  searchEvents(_data: SearchEventsQueryDTO): SearchEventsResponseDTO {
+    return { events: [], totalCount: 0 };
+  }
+
+  @GrpcMethod(
+    GRPC_SERVICES.EVENT_QUERY_SERVICE,
+    EVENT_QUERY_METHODS.LIST_REQUIREMENTS,
+  )
+  listRequirements(
+    _data: ListRequirementsQueryDTO,
+  ): ListRequirementsResponseDTO {
+    return { requirements: [] };
   }
 }
