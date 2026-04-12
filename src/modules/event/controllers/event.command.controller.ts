@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+import { Logger } from '@volontariapp/logger';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   GRPC_SERVICES,
@@ -19,11 +20,15 @@ import {
 
 @Controller()
 export class EventCommandController {
+  private readonly logger = new Logger({
+    context: EventCommandController.name,
+  });
   @GrpcMethod(
     GRPC_SERVICES.EVENT_COMMAND_SERVICE,
     EVENT_COMMAND_METHODS.CREATE_EVENT,
   )
-  createEvent(_data: CreateEventCommandDTO): CreateEventResponseDTO {
+  createEvent(data: CreateEventCommandDTO): CreateEventResponseDTO {
+    this.logger.log(`gRPC: Creating event with title: ${data.title}`);
     return { event: undefined };
   }
 
@@ -31,7 +36,8 @@ export class EventCommandController {
     GRPC_SERVICES.EVENT_COMMAND_SERVICE,
     EVENT_COMMAND_METHODS.UPDATE_EVENT,
   )
-  updateEvent(_data: UpdateEventCommandDTO): UpdateEventResponseDTO {
+  updateEvent(data: UpdateEventCommandDTO): UpdateEventResponseDTO {
+    this.logger.log(`gRPC: Updating event with id: ${data.id}`);
     return { event: undefined };
   }
 
@@ -40,8 +46,9 @@ export class EventCommandController {
     EVENT_COMMAND_METHODS.CHANGE_EVENT_STATE,
   )
   changeEventState(
-    _data: ChangeEventStateCommandDTO,
+    data: ChangeEventStateCommandDTO,
   ): ChangeEventStateResponseDTO {
+    this.logger.log(`gRPC: Changing state for event with id: ${data.id}`);
     return { event: undefined };
   }
 
@@ -50,8 +57,11 @@ export class EventCommandController {
     EVENT_COMMAND_METHODS.MANAGE_REQUIREMENTS,
   )
   manageRequirements(
-    _data: ManageRequirementCommandDTO,
+    data: ManageRequirementCommandDTO,
   ): ManageRequirementsResponseDTO {
+    this.logger.log(
+      `gRPC: Managing requirements for event with id: ${data.eventId}`,
+    );
     return { success: true, message: 'Requirement processed' };
   }
 
@@ -59,7 +69,8 @@ export class EventCommandController {
     GRPC_SERVICES.EVENT_COMMAND_SERVICE,
     EVENT_COMMAND_METHODS.DELETE_EVENT,
   )
-  deleteEvent(_data: DeleteEventCommandDTO): DeleteEventResponseDTO {
+  deleteEvent(data: DeleteEventCommandDTO): DeleteEventResponseDTO {
+    this.logger.log(`gRPC: Deleting event with id: ${data.id}`);
     return { success: true };
   }
 }

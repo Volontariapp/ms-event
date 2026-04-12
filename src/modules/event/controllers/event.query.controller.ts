@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+import { Logger } from '@volontariapp/logger';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   GRPC_SERVICES,
@@ -17,8 +18,10 @@ import {
 
 @Controller()
 export class EventQueryController {
+  private readonly logger = new Logger({ context: EventQueryController.name });
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.GET_EVENT)
-  getEvent(_data: GetEventQueryDTO): GetEventResponseDTO {
+  getEvent(data: GetEventQueryDTO): GetEventResponseDTO {
+    this.logger.log(`gRPC: Fetching event with id: ${data.id}`);
     return { event: undefined };
   }
 
@@ -26,7 +29,10 @@ export class EventQueryController {
     GRPC_SERVICES.EVENT_QUERY_SERVICE,
     EVENT_QUERY_METHODS.SEARCH_EVENTS,
   )
-  searchEvents(_data: SearchEventsQueryDTO): SearchEventsResponseDTO {
+  searchEvents(data: SearchEventsQueryDTO): SearchEventsResponseDTO {
+    this.logger.log(
+      `gRPC: Searching events with filters: ${JSON.stringify(data)}`,
+    );
     return { events: [], totalCount: 0 };
   }
 
@@ -35,8 +41,11 @@ export class EventQueryController {
     EVENT_QUERY_METHODS.LIST_REQUIREMENTS,
   )
   listRequirements(
-    _data: ListRequirementsQueryDTO,
+    data: ListRequirementsQueryDTO,
   ): ListRequirementsResponseDTO {
+    this.logger.log(
+      `gRPC: Listing requirements for event with id: ${data.eventId}`,
+    );
     return { requirements: [] };
   }
 }
