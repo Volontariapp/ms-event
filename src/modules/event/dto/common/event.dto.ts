@@ -5,24 +5,25 @@ import type {
   Point,
   Tag,
   Requirement,
+  Timestamp,
 } from '@volontariapp/contracts-nest';
 
 export class EventDTO implements Event {
-  currentParticipants!: number;
   id!: string;
   title!: string;
   description!: string;
-  startAt!: Date;
-  endAt!: Date;
+  startAt: Timestamp | undefined;
+  endAt: Timestamp | undefined;
   location: Point | undefined;
   localisationName!: string;
   type!: EventType;
+  state!: EventState;
   awardedImpactScore!: number;
   maxParticipants!: number;
+  currentParticipants!: number;
+  organizerId!: string;
   tags!: Tag[];
   requirements!: Requirement[];
-  organizerId!: string;
-  state!: EventState;
-  createdAt!: Date;
-  updatedAt!: Date;
+  createdAt: Timestamp | undefined;
+  updatedAt: Timestamp | undefined;
 }

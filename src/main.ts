@@ -10,6 +10,8 @@ import { AppConfigService } from './config/app-config.service.js';
 import { loadConfig } from '@volontariapp/config';
 import { CustomConfig } from './config/base-config.js';
 import { Logger } from '@volontariapp/logger';
+import { ValidationPipe } from '@nestjs/common';
+import { GlobalExceptionFilter } from '@volontariapp/errors-nest';
 
 function resolveConfigDirectory(): string {
   const currentFileDir = dirname(fileURLToPath(import.meta.url));
@@ -36,6 +38,9 @@ async function bootstrap() {
   app.connectMicroservice(
     getGrpcOptions('EVENT', configService.config.microServices.msEventUrl),
   );
+
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   await app.startAllMicroservices();
   await app.listen(configService.config.port);
