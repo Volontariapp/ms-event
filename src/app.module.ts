@@ -6,6 +6,9 @@ import { EventModule } from './modules/event/event.module.js';
 import { HealthModule } from '@volontariapp/health-check-nest';
 import { TerminusModule } from '@nestjs/terminus';
 import { GrpcClientModule } from './grpc/grpc-client.module.js';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { GlobalExceptionFilter } from '@volontariapp/errors-nest';
+import { GrpcValidationPipe } from './common/pipes/grpc-validation.pipe.js';
 
 @Module({
   imports: [DatabaseModule, EventModule, GrpcClientModule],
@@ -24,6 +27,16 @@ export class AppModule {
         }),
         EventModule,
         GrpcClientModule,
+      ],
+      providers: [
+        {
+          provide: APP_FILTER,
+          useClass: GlobalExceptionFilter,
+        },
+        {
+          provide: APP_PIPE,
+          useClass: GrpcValidationPipe,
+        },
       ],
     };
   }

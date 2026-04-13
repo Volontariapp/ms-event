@@ -25,15 +25,12 @@ import {
     TagQueryController,
   ],
   providers: [
-    // Repositories
     PostgresEventRepository,
     PostgresTagRepository,
     PostgresRequirementRepository,
-    // Domain services
     EventService,
     TagService,
     RequirementService,
-    // Transformers
     TagTransformer,
     RequirementTransformer,
     EventTransformer,

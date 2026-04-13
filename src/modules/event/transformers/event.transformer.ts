@@ -5,7 +5,7 @@ import {
   TagEntity,
 } from '@volontariapp/domain-event';
 import type { Event } from '@volontariapp/contracts-nest';
-import { EventDTO } from '../dto/common/event.dto.js';
+import { EventDTO } from '../dto/common/event/event.dto.js';
 import { PointDTO } from '../dto/common/point.dto.js';
 import { CreateEventCommandDTO } from '../dto/request/command/create-event.command.dto.js';
 import { TagTransformer } from './tag.transformer.js';

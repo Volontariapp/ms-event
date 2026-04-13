@@ -54,9 +54,10 @@ export class EventCommandController {
     data: UpdateEventCommandDTO,
   ): Promise<UpdateEventResponseDTO> {
     this.logger.log(`gRPC: Updating event with id: ${data.id}`);
-    const partial = data.event
-      ? this.eventTransformer.fromEventDTO(data.event)
-      : {};
+    const partial = this.eventTransformer.fromEventDTO(data.event);
+    this.logger.debug(
+      `gRPC: Updating event payload: ${JSON.stringify(partial)}`,
+    );
     const entity = await this.eventService.update(data.id, partial);
     return { event: this.eventTransformer.toEventDTO(entity) };
   }

@@ -12,7 +12,7 @@ import type {
   DeleteTagResponse,
   DeleteEventResponse,
 } from '@volontariapp/contracts-nest';
-import type { EventDTO } from '../common/event.dto.js';
+import type { EventDTO } from '../common/event/event.dto.js';
 import type { TagDTO, RequirementDTO } from '../common/common.dto.js';
 
 export class CreateEventResponseDTO implements CreateEventResponse {
