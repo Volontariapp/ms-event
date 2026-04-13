@@ -35,6 +35,9 @@ async function bootstrap() {
 
   app.connectMicroservice(
     getGrpcOptions('EVENT', configService.config.microServices.msEventUrl),
+    {
+      inheritAppConfig: true,
+    },
   );
 
   await app.startAllMicroservices();

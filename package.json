@@ -21,31 +21,52 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage --passWithNoTests",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "node --loader ts-node/esm ./node_modules/typeorm/cli.js",
+    "migration:generate": "yarn typeorm migration:generate -d src/config/data-source.ts",
+    "migration:run:local": "NODE_ENV=local yarn typeorm migration:run -d src/config/data-source.ts",
+    "migration:run:dev": "NODE_ENV=development yarn typeorm migration:run -d src/config/data-source.ts",
+    "migration:run:test": "NODE_ENV=test yarn typeorm migration:run -d src/config/data-source.ts",
+    "migration:run:prod": "NODE_ENV=production yarn typeorm migration:run -d src/config/data-source.ts",
+    "migration:revert:local": "NODE_ENV=local yarn typeorm migration:revert -d src/config/data-source.ts",
+    "migration:revert:dev": "NODE_ENV=development yarn typeorm migration:revert -d src/config/data-source.ts",
+    "migration:revert:test": "NODE_ENV=test yarn typeorm migration:revert -d src/config/data-source.ts",
+    "migration:revert:prod": "NODE_ENV=production yarn typeorm migration:revert -d src/config/data-source.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",
     "@grpc/proto-loader": "^0.8.0",
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
     "@nestjs/microservices": "^11.1.14",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.2.7",
+    "@nestjs/terminus": "^11.1.1",
+    "@nestjs/typeorm": "^11.0.1",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/core": "^2.6.1",
-    "@volontariapp/auth": "2.1.0",
-    "@volontariapp/bridge-nest": "0.2.0",
-    "@volontariapp/config": "1.0.0",
-    "@volontariapp/contracts-nest": "2.1.0",
-    "@volontariapp/errors": "0.3.0",
-    "@volontariapp/errors-nest": "0.4.0",
-    "@volontariapp/logger": "0.2.0",
-    "@volontariapp/monitoring": "2.1.0",
+    "@volontariapp/auth": "2.1.9",
+    "@volontariapp/bridge-nest": "0.3.0",
+    "@volontariapp/config": "1.1.0",
+    "@volontariapp/contracts": "3.3.0",
+    "@volontariapp/contracts-nest": "2.2.3",
+    "@volontariapp/domain-event": "2.2.8",
+    "@volontariapp/errors": "0.4.3",
+    "@volontariapp/errors-nest": "0.7.3",
+    "@volontariapp/health-check": "0.1.4",
+    "@volontariapp/health-check-nest": "0.1.13",
+    "@volontariapp/logger": "0.2.2",
+    "@volontariapp/monitoring": "2.1.2",
+    "@volontariapp/validation-nest": "0.1.0",
+    "axios": "^1.15.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "joi": "^18.0.2",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.28"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -96,10 +117,5 @@
     "extensionsToTreatAsEsm": [
       ".ts"
     ]
-  },
-  "resolutions": {
-    "glob": "^13.0.6",
-    "node-domexception": "1.0.0",
-    "gaxios": "^6.7.1"
   }
 }
