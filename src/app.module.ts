@@ -8,7 +8,8 @@ import { TerminusModule } from '@nestjs/terminus';
 import { GrpcClientModule } from './grpc/grpc-client.module.js';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { GlobalExceptionFilter } from '@volontariapp/errors-nest';
-import { GrpcValidationPipe } from './common/pipes/grpc-validation.pipe.js';
+import { GrpcValidationPipe } from '@volontariapp/validation-nest';
+import { EventState, EventType } from '@volontariapp/contracts-nest';
 
 @Module({
   imports: [DatabaseModule, EventModule, GrpcClientModule],
@@ -35,7 +36,13 @@ export class AppModule {
         },
         {
           provide: APP_PIPE,
-          useClass: GrpcValidationPipe,
+          useFactory: (): GrpcValidationPipe =>
+            new GrpcValidationPipe({
+              enumMaps: {
+                type: EventType,
+                state: EventState,
+              },
+            }),
         },
       ],
     };

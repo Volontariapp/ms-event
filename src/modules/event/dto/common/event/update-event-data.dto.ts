@@ -1,5 +1,5 @@
 import { Event, EventState, EventType } from '@volontariapp/contracts-nest';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
@@ -46,24 +46,10 @@ export class UpdateEventDataDTO implements Partial<Event> {
   localisationName?: string;
 
   @IsOptional()
-  @Transform(({ value }: { value: unknown }) => {
-    if (typeof value === 'string') {
-      const enumValue = EventType[value as keyof typeof EventType];
-      return typeof enumValue === 'number' ? enumValue : value;
-    }
-    return value;
-  })
   @IsEnum(EventType)
   public type?: EventType;
 
   @IsOptional()
-  @Transform(({ value }: { value: unknown }) => {
-    if (typeof value === 'string') {
-      const enumValue = EventState[value as keyof typeof EventState];
-      return typeof enumValue === 'number' ? enumValue : value;
-    }
-    return value;
-  })
   @IsEnum(EventState)
   public state?: EventState;
 

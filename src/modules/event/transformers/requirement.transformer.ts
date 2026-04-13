@@ -8,7 +8,10 @@ export class RequirementTransformer {
     const entity = new RequirementEntity();
     if (dto.id !== undefined) entity.id = dto.id;
     if (dto.name !== undefined) entity.name = dto.name;
+    if (dto.description !== undefined) entity.description = dto.description;
     if (dto.neededQuantity !== undefined) entity.quantity = dto.neededQuantity;
+    if (dto.currentQuantity !== undefined)
+      entity.currentQuantity = dto.currentQuantity;
     entity.isSystem = false;
     return entity;
   }
@@ -17,9 +20,9 @@ export class RequirementTransformer {
     const dto = new RequirementDTO();
     dto.id = entity.id;
     dto.name = entity.name;
-    dto.description = '';
+    dto.description = entity.description;
     dto.neededQuantity = entity.quantity;
-    dto.currentQuantity = 0;
+    dto.currentQuantity = entity.currentQuantity;
     return dto;
   }
 }

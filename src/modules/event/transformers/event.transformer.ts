@@ -35,18 +35,16 @@ export class EventTransformer {
     entity.startAt = GrpcDateMapper.toDate(dto.startAt);
     entity.endAt = GrpcDateMapper.toDate(dto.endAt);
 
-    if (dto.location) {
-      entity.location = new EventLocation(
-        dto.location.latitude,
-        dto.location.longitude,
-      );
-    }
+    entity.location = new EventLocation(
+      dto.location.latitude,
+      dto.location.longitude,
+    );
 
     entity.type = dto.type;
-    entity.awardedImpactScore = dto.awardedImpactScore ?? 0;
-    entity.maxParticipants = dto.maxParticipants ?? 0;
+    entity.awardedImpactScore = dto.awardedImpactScore;
+    entity.maxParticipants = dto.maxParticipants;
 
-    if (dto.tagIds && dto.tagIds.length > 0) {
+    if (dto.tagIds.length > 0) {
       entity.tags = dto.tagIds.map((id: string) => {
         const t = new TagEntity();
         t.id = id;
@@ -63,7 +61,7 @@ export class EventTransformer {
   fromEventDTO(dto: Partial<Event>): Partial<EventEntity> {
     const entity = new EventEntity();
 
-    if (dto.id && dto.id !== '') entity.id = dto.id;
+    if (dto.id !== undefined && dto.id !== '') entity.id = dto.id;
     if (dto.title !== undefined) entity.name = dto.title;
     if (dto.description !== undefined) entity.description = dto.description;
 
@@ -99,15 +97,14 @@ export class EventTransformer {
 
   /**
    * EventEntity → EventDTO
-   * Used for all response shapes (GetEvent, CreateEvent, UpdateEvent, SearchEvents…)
    */
   toEventDTO(entity: EventEntity): EventDTO {
     const dto = new EventDTO();
     dto.id = entity.id;
     dto.title = entity.name;
     dto.description = entity.description;
-    dto.startAt = GrpcDateMapper.toTimestamp(entity.startAt)!;
-    dto.endAt = GrpcDateMapper.toTimestamp(entity.endAt)!;
+    dto.startAt = GrpcDateMapper.toTimestamp(entity.startAt);
+    dto.endAt = GrpcDateMapper.toTimestamp(entity.endAt);
 
     const point = new PointDTO();
     point.latitude = entity.location.latitude;
@@ -125,12 +122,11 @@ export class EventTransformer {
       ? entity.requirements.map((r) => this.requirementTransformer.toDto(r))
       : [];
 
-    // Fields not stored in the domain entity — zero-valued for now
-    dto.currentParticipants = 0;
-    dto.localisationName = '';
-    dto.organizerId = '';
-    dto.createdAt = GrpcDateMapper.toTimestamp(entity.createdAt || new Date())!;
-    dto.updatedAt = GrpcDateMapper.toTimestamp(entity.updatedAt || new Date())!;
+    dto.currentParticipants = entity.currentParticipants;
+    dto.localisationName = entity.localisationName;
+    dto.organizerId = entity.organizerId;
+    dto.createdAt = GrpcDateMapper.toTimestamp(entity.createdAt);
+    dto.updatedAt = GrpcDateMapper.toTimestamp(entity.updatedAt);
     return dto;
   }
 }
