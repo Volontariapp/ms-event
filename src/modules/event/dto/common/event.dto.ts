@@ -6,14 +6,15 @@ import type {
   Tag,
   Requirement,
 } from '@volontariapp/contracts-nest';
+import type { TimestampDTO } from './timestamp.dto.js';
 
 export class EventDTO implements Event {
   currentParticipants!: number;
   id!: string;
   title!: string;
   description!: string;
-  startAt!: Date;
-  endAt!: Date;
+  startAt!: TimestampDTO;
+  endAt!: TimestampDTO;
   location: Point | undefined;
   localisationName!: string;
   type!: EventType;
@@ -23,6 +24,6 @@ export class EventDTO implements Event {
   requirements!: Requirement[];
   organizerId!: string;
   state!: EventState;
-  createdAt!: Date;
-  updatedAt!: Date;
+  createdAt!: TimestampDTO;
+  updatedAt!: TimestampDTO;
 }
