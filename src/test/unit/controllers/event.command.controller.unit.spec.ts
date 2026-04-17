@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { EventCommandController } from '../../../modules/event/controllers/event.command.controller.js';
-import { EventService, RequirementService } from '@volontariapp/domain-event';
-import { EventTransformer } from '../../../modules/event/transformers/index.js';
+import type {
+  EventEntity,
+  EventService,
+  RequirementService,
+} from '@volontariapp/domain-event';
+import type { EventTransformer } from '../../../modules/event/transformers/index.js';
+import type { EventDTO } from '../../../modules/event/dto/common/event/event.dto.js';
 import {
   createCreateEventDTO,
   createChangeEventStateDTO,
@@ -46,18 +51,22 @@ describe('EventCommandController (Unit)', () => {
   describe('createEvent', () => {
     it('should create an event and return the response', async () => {
       const dto = createCreateEventDTO();
-      const entity = { id: 'uuid', title: dto.title } as any;
-      const responseDto = { id: 'uuid', title: dto.title } as any;
+      const entity = { id: 'uuid', title: dto.title } as unknown as EventEntity;
+      const responseDto = {
+        id: 'uuid',
+        title: dto.title,
+      } as unknown as EventDTO;
 
       eventTransformer.fromCreateCommand.mockReturnValue({
         title: dto.title,
-      } as any);
+      } as unknown as EventEntity);
       eventService.create.mockResolvedValue(entity);
       eventTransformer.toEventDTO.mockReturnValue(responseDto);
 
       const result = await controller.createEvent(dto);
 
       expect(result).toEqual({ event: responseDto });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventService.create).toHaveBeenCalled();
     });
   });
@@ -65,8 +74,14 @@ describe('EventCommandController (Unit)', () => {
   describe('changeEventState', () => {
     it('should change event state and return the response', async () => {
       const dto = createChangeEventStateDTO();
-      const entity = { id: dto.id, state: dto.newState } as any;
-      const responseDto = { id: dto.id, state: dto.newState } as any;
+      const entity = {
+        id: dto.id,
+        state: dto.newState,
+      } as unknown as EventEntity;
+      const responseDto = {
+        id: dto.id,
+        state: dto.newState,
+      } as unknown as EventDTO;
 
       eventService.changeState.mockResolvedValue(entity);
       eventTransformer.toEventDTO.mockReturnValue(responseDto);
@@ -74,6 +89,7 @@ describe('EventCommandController (Unit)', () => {
       const result = await controller.changeEventState(dto);
 
       expect(result).toEqual({ event: responseDto });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventService.changeState).toHaveBeenCalledWith(
         dto.id,
         dto.newState,
@@ -84,11 +100,12 @@ describe('EventCommandController (Unit)', () => {
   describe('deleteEvent', () => {
     it('should delete an event and return success', async () => {
       const dto = { id: 'uuid' };
-      eventService.delete.mockResolvedValue(undefined as any);
+      eventService.delete.mockResolvedValue(undefined);
 
       const result = await controller.deleteEvent(dto);
 
       expect(result).toEqual({ success: true });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventService.delete).toHaveBeenCalledWith(dto.id);
     });
   });
