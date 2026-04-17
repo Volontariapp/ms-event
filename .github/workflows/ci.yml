@@ -12,3 +12,15 @@ jobs:
     with:
       service-name: ms-event
     secrets: inherit
+
+  smoke-test:
+    needs: ci
+    uses: Volontariapp/ci-tools/.github/workflows/ci-docker-smoke.yml@main
+    with:
+      service-name: ms-event
+      db-image: "postgis/postgis:16-3.4"
+      db-name: "ms_event"
+      db-user: "user"
+      db-password: "password"
+      port: 3003
+    secrets: inherit

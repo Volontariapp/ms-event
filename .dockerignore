@@ -1,0 +1,26 @@
+node_modules
+dist
+coverage
+.git
+.gitignore
+.gitmodules
+.claude
+.github
+*.md
+npm-packages
+api-gateway
+nativapp
+ms-*
+!ms-event # If we are at root and this is a general dockerfile, but we are supposed to be at root of ms-event
+dockerfile
+Dockerfile
+.editorconfig
+.prettierrc
+eslint.config.mjs
+tsconfig.build.json
+nest-cli.json
+.vscode
+.yarn/cache
+.yarn/unplugged
+.yarn/install-state.gz
+build
