@@ -33,12 +33,12 @@ export class EventTransformer {
 
     entity.name = dto.title;
     entity.description = dto.description;
-    const startAt = GrpcDateMapper.toDate(dto.startAt) as Date | undefined;
+    const startAt = GrpcDateMapper.toDate(dto.startAt);
     if (!startAt) {
       throw INVALID_DATE_PARAMETERS('startAt is invalid');
     }
     entity.startAt = startAt;
-    const endAt = GrpcDateMapper.toDate(dto.endAt) as Date | undefined;
+    const endAt = GrpcDateMapper.toDate(dto.endAt);
     if (!endAt) {
       throw INVALID_DATE_PARAMETERS('endAt is invalid');
     }
@@ -72,7 +72,7 @@ export class EventTransformer {
     if (dto.description !== undefined) entity.description = dto.description;
 
     if (dto.startAt) {
-      const startAt = GrpcDateMapper.toDate(dto.startAt) as Date | undefined;
+      const startAt = GrpcDateMapper.toDate(dto.startAt);
       if (!startAt) {
         throw INVALID_DATE_PARAMETERS('startAt is invalid');
       }
@@ -80,7 +80,7 @@ export class EventTransformer {
     }
 
     if (dto.endAt) {
-      const endAt = GrpcDateMapper.toDate(dto.endAt) as Date | undefined;
+      const endAt = GrpcDateMapper.toDate(dto.endAt);
       if (!endAt) {
         throw INVALID_DATE_PARAMETERS('endAt is invalid');
       }
