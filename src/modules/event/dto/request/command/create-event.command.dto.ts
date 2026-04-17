@@ -10,7 +10,6 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateEventCommand, EventType } from '@volontariapp/contracts-nest';
-import { PointDTO } from '../../common/point.dto.js';
 import { TimestampDTO } from '../../common/timestamp.dto.js';
 
 export class CreateEventCommandDTO implements CreateEventCommand {
@@ -29,10 +28,6 @@ export class CreateEventCommandDTO implements CreateEventCommand {
   @ValidateNested()
   @Type(() => TimestampDTO)
   endAt: TimestampDTO | undefined;
-
-  @ValidateNested()
-  @Type(() => PointDTO)
-  location!: PointDTO;
 
   @IsString()
   localisationName!: string;

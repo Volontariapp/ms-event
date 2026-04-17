@@ -47,11 +47,11 @@ export class UpdateEventDataDTO implements Partial<Event> {
 
   @IsOptional()
   @IsEnum(EventType)
-  public type?: EventType;
+  type?: EventType;
 
   @IsOptional()
   @IsEnum(EventState)
-  public state?: EventState;
+  state?: EventState;
 
   @IsOptional()
   @IsNumber()

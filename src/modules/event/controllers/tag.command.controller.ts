@@ -39,7 +39,7 @@ export class TagCommandController {
     this.logger.log(`gRPC: Updating tag with id: ${data.id}`);
     const entity = await this.tagService.update(data.id, {
       name: data.name,
-      color: data.color,
+      balise: data.balise,
     });
     return { tag: this.tagTransformer.toDto(entity) };
   }

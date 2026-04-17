@@ -1,5 +1,6 @@
 import type { CreateTagCommand } from '@volontariapp/contracts-nest';
-import { IsHexColor, IsString } from 'class-validator';
+import { TagsNames } from '@volontariapp/shared';
+import { IsEnum, IsString } from 'class-validator';
 
 export class CreateTagCommandDTO implements CreateTagCommand {
   @IsString()
@@ -8,6 +9,6 @@ export class CreateTagCommandDTO implements CreateTagCommand {
   @IsString()
   name!: string;
 
-  @IsHexColor()
-  color!: string;
+  @IsEnum(TagsNames)
+  balise!: string;
 }
