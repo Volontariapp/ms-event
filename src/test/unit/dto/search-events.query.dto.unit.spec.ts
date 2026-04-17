@@ -1,7 +1,7 @@
 import { validate } from 'class-validator';
 import { createSearchEventsQueryDTO } from '../../factories/event.factory.js';
-import { EventType } from '@volontariapp/contracts-nest';
 import { describe, it, expect } from '@jest/globals';
+import type { EventType } from '@volontariapp/contracts-nest';
 
 describe('SearchEventsQueryDTO (Unit)', () => {
   it('should validate a valid DTO', async () => {
@@ -13,7 +13,7 @@ describe('SearchEventsQueryDTO (Unit)', () => {
   describe('types', () => {
     it('should fail if types contains invalid enum values', async () => {
       const dto = createSearchEventsQueryDTO({
-        types: ['INVALID_TYPE' as any],
+        types: ['INVALID_TYPE' as unknown as EventType],
       });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
@@ -32,7 +32,9 @@ describe('SearchEventsQueryDTO (Unit)', () => {
 
   describe('onlyAvailable', () => {
     it('should fail if onlyAvailable is not a boolean', async () => {
-      const dto = createSearchEventsQueryDTO({ onlyAvailable: 'true' as any });
+      const dto = createSearchEventsQueryDTO({
+        onlyAvailable: 'true' as unknown as boolean,
+      });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].property).toBe('onlyAvailable');

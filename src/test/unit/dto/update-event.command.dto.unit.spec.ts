@@ -2,6 +2,7 @@ import { validate } from 'class-validator';
 import { createUpdateEventDTO } from '../../factories/event.factory.js';
 import { describe, it, expect } from '@jest/globals';
 import { UpdateEventDataDTO } from '../../../modules/event/dto/common/event/update-event-data.dto.js';
+import type { Event } from '@volontariapp/contracts-nest';
 
 describe('UpdateEventCommandDTO (Unit)', () => {
   it('should validate a valid DTO', async () => {
@@ -28,14 +29,18 @@ describe('UpdateEventCommandDTO (Unit)', () => {
 
   describe('updateMask', () => {
     it('should fail if updateMask is not an array', async () => {
-      const dto = createUpdateEventDTO({ updateMask: 'title' as any });
+      const dto = createUpdateEventDTO({
+        updateMask: 'title' as unknown as string[],
+      });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].property).toBe('updateMask');
     });
 
     it('should fail if updateMask contains non-string values', async () => {
-      const dto = createUpdateEventDTO({ updateMask: [123] as any });
+      const dto = createUpdateEventDTO({
+        updateMask: [123] as unknown as string[],
+      });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].property).toBe('updateMask');
@@ -45,9 +50,11 @@ describe('UpdateEventCommandDTO (Unit)', () => {
   describe('event (nested)', () => {
     it('should fail if nested event data is invalid', async () => {
       const nestedEvent = new UpdateEventDataDTO();
-      nestedEvent.title = 123 as any; // Should be string
+      nestedEvent.title = 123 as unknown as string; // Should be string
 
-      const dto = createUpdateEventDTO({ event: nestedEvent as any });
+      const dto = createUpdateEventDTO({
+        event: nestedEvent as unknown as Event,
+      });
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].property).toBe('event');

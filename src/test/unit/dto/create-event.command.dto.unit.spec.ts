@@ -1,6 +1,6 @@
 import { validate } from 'class-validator';
 import { createCreateEventDTO } from '../../factories/event.factory.js';
-import { EventType } from '@volontariapp/contracts-nest';
+import type { EventType } from '@volontariapp/contracts-nest';
 import { describe, it, expect } from '@jest/globals';
 
 describe('CreateEventCommandDTO (Unit)', () => {

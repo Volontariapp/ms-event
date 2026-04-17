@@ -8,34 +8,16 @@ export const createCreateEventDTO = (
   overrides?: Partial<CreateEventCommandDTO>,
 ): CreateEventCommandDTO => {
   const dto = new CreateEventCommandDTO();
-  dto.title =
-    overrides && 'title' in overrides ? overrides.title! : 'Test Event';
-  dto.description =
-    overrides && 'description' in overrides
-      ? overrides.description!
-      : 'Test Description';
-  dto.localisationName =
-    overrides && 'localisationName' in overrides
-      ? overrides.localisationName!
-      : 'Paris';
-  dto.type =
-    overrides && 'type' in overrides
-      ? overrides.type!
-      : EventType.EVENT_TYPE_SOCIAL;
-  dto.awardedImpactScore =
-    overrides && 'awardedImpactScore' in overrides
-      ? overrides.awardedImpactScore!
-      : 10;
-  dto.maxParticipants =
-    overrides && 'maxParticipants' in overrides
-      ? overrides.maxParticipants!
-      : 100;
-  dto.tagIds =
-    overrides && 'tagIds' in overrides
-      ? overrides.tagIds!
-      : ['550e8400-e29b-41d4-a716-446655440000'];
-  dto.startAt = overrides?.startAt;
-  dto.endAt = overrides?.endAt;
+  const defaults: Partial<CreateEventCommandDTO> = {
+    title: 'Test Event',
+    description: 'Test Description',
+    localisationName: 'Paris',
+    type: EventType.EVENT_TYPE_SOCIAL,
+    awardedImpactScore: 10,
+    maxParticipants: 100,
+    tagIds: ['550e8400-e29b-41d4-a716-446655440000'],
+  };
+  Object.assign(dto, defaults, overrides ?? {});
   return dto;
 };
 
@@ -43,13 +25,11 @@ export const createUpdateEventDTO = (
   overrides?: Partial<UpdateEventCommandDTO>,
 ): UpdateEventCommandDTO => {
   const dto = new UpdateEventCommandDTO();
-  dto.id =
-    overrides && 'id' in overrides
-      ? overrides.id!
-      : '550e8400-e29b-41d4-a716-446655440000';
-  dto.updateMask =
-    overrides && 'updateMask' in overrides ? overrides.updateMask! : ['title'];
-  dto.event = overrides?.event as any;
+  const defaults: Partial<UpdateEventCommandDTO> = {
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    updateMask: ['title'],
+  };
+  Object.assign(dto, defaults, overrides ?? {});
   return dto;
 };
 
@@ -57,14 +37,11 @@ export const createChangeEventStateDTO = (
   overrides?: Partial<ChangeEventStateCommandDTO>,
 ): ChangeEventStateCommandDTO => {
   const dto = new ChangeEventStateCommandDTO();
-  dto.id =
-    overrides && 'id' in overrides
-      ? overrides.id!
-      : '550e8400-e29b-41d4-a716-446655440000';
-  dto.newState =
-    overrides && 'newState' in overrides
-      ? overrides.newState!
-      : EventState.EVENT_STATE_PUBLISHED;
+  const defaults: Partial<ChangeEventStateCommandDTO> = {
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    newState: EventState.EVENT_STATE_PUBLISHED,
+  };
+  Object.assign(dto, defaults, overrides ?? {});
   return dto;
 };
 
@@ -72,15 +49,10 @@ export const createSearchEventsQueryDTO = (
   overrides?: Partial<SearchEventsQueryDTO>,
 ): SearchEventsQueryDTO => {
   const dto = new SearchEventsQueryDTO();
-  dto.types =
-    overrides && 'types' in overrides
-      ? overrides.types!
-      : [EventType.EVENT_TYPE_SOCIAL];
-  dto.onlyAvailable =
-    overrides && 'onlyAvailable' in overrides ? overrides.onlyAvailable! : true;
-  dto.organizerId =
-    overrides && 'organizerId' in overrides
-      ? overrides.organizerId!
-      : (undefined as any);
+  const defaults: Partial<SearchEventsQueryDTO> = {
+    types: [EventType.EVENT_TYPE_SOCIAL],
+    onlyAvailable: true,
+  };
+  Object.assign(dto, defaults, overrides ?? {});
   return dto;
 };
