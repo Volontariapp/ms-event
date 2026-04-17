@@ -41,6 +41,7 @@ export class AppModule {
               enumMaps: {
                 type: EventType,
                 state: EventState,
+                newState: EventState,
               },
             }),
         },

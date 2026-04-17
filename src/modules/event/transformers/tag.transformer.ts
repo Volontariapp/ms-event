@@ -9,7 +9,7 @@ export class TagTransformer {
     if (dto.id !== undefined) entity.id = dto.id;
     if (dto.name !== undefined) entity.name = dto.name;
     if (dto.slug !== undefined) entity.slug = dto.slug;
-    if (dto.color !== undefined) entity.color = dto.color;
+    if (dto.balise !== undefined) entity.balise = dto.balise;
     return entity;
   }
 
@@ -18,7 +18,7 @@ export class TagTransformer {
     dto.id = entity.id;
     dto.name = entity.name;
     dto.slug = entity.slug;
-    dto.color = entity.color;
+    dto.balise = entity.balise;
     return dto;
   }
 }

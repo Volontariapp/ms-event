@@ -12,6 +12,7 @@ import { TagTransformer } from './tag.transformer.js';
 import { RequirementTransformer } from './requirement.transformer.js';
 import { Logger } from '@volontariapp/logger';
 import { GrpcDateMapper } from '@volontariapp/contracts-nest';
+import { INVALID_DATE_PARAMETERS } from '@volontariapp/errors-nest';
 
 @Injectable()
 export class EventTransformer {
@@ -25,20 +26,25 @@ export class EventTransformer {
   /**
    * CreateEventCommandDTO → EventEntity
    */
-  fromCreateCommand(dto: CreateEventCommandDTO): Partial<EventEntity> {
+  fromCreateCommand(dto: CreateEventCommandDTO): EventEntity {
     const entity = new EventEntity();
 
     this.logger.debug(`Mapping CreateEventCommandDTO: ${JSON.stringify(dto)}`);
 
     entity.name = dto.title;
     entity.description = dto.description;
-    entity.startAt = GrpcDateMapper.toDate(dto.startAt);
-    entity.endAt = GrpcDateMapper.toDate(dto.endAt);
+    const startAt = GrpcDateMapper.toDate(dto.startAt) as Date | undefined;
+    if (!startAt) {
+      throw INVALID_DATE_PARAMETERS('startAt is invalid');
+    }
+    entity.startAt = startAt;
+    const endAt = GrpcDateMapper.toDate(dto.endAt) as Date | undefined;
+    if (!endAt) {
+      throw INVALID_DATE_PARAMETERS('endAt is invalid');
+    }
+    entity.endAt = endAt;
 
-    entity.location = new EventLocation(
-      dto.location.latitude,
-      dto.location.longitude,
-    );
+    entity.localisationName = dto.localisationName;
 
     entity.type = dto.type;
     entity.awardedImpactScore = dto.awardedImpactScore;
@@ -65,12 +71,20 @@ export class EventTransformer {
     if (dto.title !== undefined) entity.name = dto.title;
     if (dto.description !== undefined) entity.description = dto.description;
 
-    if (dto.startAt !== undefined) {
-      entity.startAt = GrpcDateMapper.toDate(dto.startAt);
+    if (dto.startAt) {
+      const startAt = GrpcDateMapper.toDate(dto.startAt) as Date | undefined;
+      if (!startAt) {
+        throw INVALID_DATE_PARAMETERS('startAt is invalid');
+      }
+      entity.startAt = startAt;
     }
 
-    if (dto.endAt !== undefined) {
-      entity.endAt = GrpcDateMapper.toDate(dto.endAt);
+    if (dto.endAt) {
+      const endAt = GrpcDateMapper.toDate(dto.endAt) as Date | undefined;
+      if (!endAt) {
+        throw INVALID_DATE_PARAMETERS('endAt is invalid');
+      }
+      entity.endAt = endAt;
     }
 
     if (dto.location) {
@@ -87,6 +101,10 @@ export class EventTransformer {
     }
     if (dto.maxParticipants !== undefined) {
       entity.maxParticipants = dto.maxParticipants;
+    }
+
+    if (dto.organizerId !== undefined) {
+      entity.organizerId = dto.organizerId;
     }
 
     if (dto.tags)

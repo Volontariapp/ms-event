@@ -56,8 +56,9 @@ export class EventDTO implements Event {
   @IsNumber()
   currentParticipants!: number;
 
+  @IsOptional()
   @IsUUID()
-  organizerId!: string;
+  organizerId?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

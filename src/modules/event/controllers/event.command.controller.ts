@@ -6,6 +6,7 @@ import {
   EVENT_COMMAND_METHODS,
 } from '@volontariapp/contracts-nest';
 import { EventService, RequirementService } from '@volontariapp/domain-event';
+import { REQUIREMENT_NOT_FOUND } from '@volontariapp/errors-nest';
 import { CreateEventCommandDTO } from '../dto/request/command/create-event.command.dto.js';
 import { UpdateEventCommandDTO } from '../dto/request/command/update-event.command.dto.js';
 import { ChangeEventStateCommandDTO } from '../dto/request/command/change-event-state.command.dto.js';
@@ -86,21 +87,40 @@ export class EventCommandController {
     );
 
     const event = await this.eventService.findById(data.eventId);
+    this.logger.debug(`gRPC: Event found: ${JSON.stringify(event)}`);
 
     if (data.add) {
       const newReq = await this.requirementService.create({
         name: data.add.name,
         quantity: data.add.neededQuantity,
         isSystem: false,
+        createdBy: event.organizerId,
       });
       const requirements = [...(event.requirements ?? []), newReq];
-      await this.eventService.update(data.eventId, { requirements });
+      this.logger.debug(
+        `gRPC: Requirements updated: ${JSON.stringify(requirements)}`,
+      );
+      const updatedEvent = await this.eventService.update(data.eventId, {
+        requirements,
+      });
+      this.logger.debug(
+        `gRPC: Event updated: ${JSON.stringify(updatedEvent.requirements)}`,
+      );
       return { success: true, message: 'Requirement added' };
     }
 
     if (data.remove) {
+      const requirementId = data.remove.requirementId;
+      const exists = (event.requirements ?? []).some(
+        (r) => r.id === requirementId,
+      );
+
+      if (!exists) {
+        throw REQUIREMENT_NOT_FOUND(requirementId);
+      }
+
       const requirements = (event.requirements ?? []).filter(
-        (r) => r.id !== data.remove?.requirementId,
+        (r) => r.id !== requirementId,
       );
       await this.eventService.update(data.eventId, { requirements });
       return { success: true, message: 'Requirement removed' };
