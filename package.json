@@ -52,7 +52,7 @@
     "@volontariapp/config": "1.1.0",
     "@volontariapp/contracts": "3.3.3",
     "@volontariapp/contracts-nest": "2.2.6",
-    "@volontariapp/domain-event": "2.3.3",
+    "@volontariapp/domain-event": "2.4.2",
     "@volontariapp/errors": "0.4.3",
     "@volontariapp/errors-nest": "0.7.3",
     "@volontariapp/health-check": "0.1.4",
@@ -109,6 +109,9 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^(\\.\\.?/.*)\\.js$": "$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
