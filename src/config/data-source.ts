@@ -1,15 +1,17 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
+import { CustomConfig } from './base-config.js';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { existsSync } from 'fs';
+
 import {
   EventModel,
   TagModel,
   RequirementModel,
 } from '@volontariapp/domain-event';
 import { loadConfig } from '@volontariapp/config';
-import { CustomConfig } from './base-config.js';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-import { existsSync } from 'fs';
+import { EventQueueModel, JobsOutboxModel } from '@volontariapp/database';
 
 function resolveConfigDirectory(): string {
   const currentFileDir = dirname(fileURLToPath(import.meta.url));
@@ -31,7 +33,7 @@ export const AppDataSource = new DataSource({
   password: appConfig.db.password,
   database: appConfig.db.database,
   ssl: appConfig.db.ssl ? { rejectUnauthorized: false } : false,
-  entities: [EventModel, TagModel, RequirementModel],
+  entities: [EventModel, TagModel, RequirementModel, EventQueueModel, JobsOutboxModel],
   migrations: [
     join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations', '*.ts'),
   ],
