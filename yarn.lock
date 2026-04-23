@@ -3957,6 +3957,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@volontariapp/database@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@volontariapp/database@npm:1.7.0"
+  dependencies:
+    "@volontariapp/bridge": "npm:0.2.8"
+    "@volontariapp/errors": "npm:0.4.4"
+    "@volontariapp/logger": "npm:0.2.3"
+    class-transformer: "npm:^0.5.1"
+    class-validator: "npm:^0.14.1"
+    pg: "npm:^8.20.0"
+    reflect-metadata: "npm:^0.2.2"
+  peerDependencies:
+    typeorm: ^0.3.20
+  checksum: 10c0/bf6ddf2d65df8bfe54aad356f2a566d21bb6ec60db3b25e6412e4f1f483e8b84428a37724a405a04b988b65a9ec5a3ff14cfac170844f29ee191a3f8146093a0
+  languageName: node
+  linkType: hard
+
 "@volontariapp/domain-event@npm:2.4.8":
   version: 2.4.8
   resolution: "@volontariapp/domain-event@npm:2.4.8"
@@ -8421,6 +8438,7 @@ __metadata:
     "@volontariapp/config": "npm:2.0.0"
     "@volontariapp/contracts": "npm:4.0.2"
     "@volontariapp/contracts-nest": "npm:3.0.2"
+    "@volontariapp/database": "npm:1.7.0"
     "@volontariapp/domain-event": "npm:2.4.8"
     "@volontariapp/errors": "npm:0.4.4"
     "@volontariapp/errors-nest": "npm:0.9.0"
