@@ -2,11 +2,7 @@ import type { DynamicModule } from '@nestjs/common';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresBridgeModule } from '@volontariapp/bridge-nest';
-import {
-  EventModel,
-  TagModel,
-  RequirementModel,
-} from '@volontariapp/domain-event';
+import { EventModel, TagModel, RequirementModel } from '@volontariapp/domain-event';
 import type { PostgresConfig } from '@volontariapp/config';
 
 const entities = [EventModel, TagModel, RequirementModel];

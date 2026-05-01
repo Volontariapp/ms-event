@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class UpdateTagSchemaAndAddEventLocalisation1776110000000 implements MigrationInterface {
   name = 'UpdateTagSchemaAndAddEventLocalisation1776110000000';
@@ -9,7 +9,9 @@ export class UpdateTagSchemaAndAddEventLocalisation1776110000000 implements Migr
     await queryRunner.query(`ALTER TABLE "tags" ALTER COLUMN "balise" TYPE character varying(100)`);
 
     // 2. Events: Add missing localisationName column
-    await queryRunner.query(`ALTER TABLE "events" ADD "localisationName" character varying(255) NOT NULL DEFAULT ''`);
+    await queryRunner.query(
+      `ALTER TABLE "events" ADD "localisationName" character varying(255) NOT NULL DEFAULT ''`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

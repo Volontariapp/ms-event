@@ -1,6 +1,8 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddEventOrganizerAndMakeRequirementCreatorNullable1776104180000 implements MigrationInterface {
+export class AddEventOrganizerAndMakeRequirementCreatorNullable1776104180000
+  implements MigrationInterface
+{
   name = 'AddEventOrganizerAndMakeRequirementCreatorNullable1776104180000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
