@@ -13,7 +13,6 @@ Database  : PostgreSQL + PostGIS (TypeORM via @volontariapp/domain-event)
 Domain lib: @volontariapp/domain-event
 Contracts : @volontariapp/contracts-nest
 ```
-
 ---
 
 ## 2. Module Structure
