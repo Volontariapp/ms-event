@@ -33,7 +33,13 @@ export const AppDataSource = new DataSource({
   password: appConfig.db.password,
   database: appConfig.db.database,
   ssl: appConfig.db.ssl ? { rejectUnauthorized: false } : false,
-  entities: [EventModel, TagModel, RequirementModel, EventQueueModel, JobsOutboxModel],
+  entities: [
+    EventModel,
+    TagModel,
+    RequirementModel,
+    EventQueueModel,
+    JobsOutboxModel,
+  ],
   migrations: [
     join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations', '*.ts'),
   ],
