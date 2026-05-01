@@ -1,8 +1,5 @@
 import type { ClientsModuleAsyncOptions } from '@nestjs/microservices';
-import {
-  GRPC_MICROSERVICES,
-  getGrpcOptions,
-} from '@volontariapp/contracts-nest';
+import { GRPC_MICROSERVICES, getGrpcOptions } from '@volontariapp/contracts-nest';
 import { AppConfigService } from '../config/app-config.service.js';
 import { EVENT_PACKAGE, POST_PACKAGE, USER_PACKAGE } from './grpc-packages.js';
 

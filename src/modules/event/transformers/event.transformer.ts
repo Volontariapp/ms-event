@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  EventEntity,
-  EventLocation,
-  TagEntity,
-} from '@volontariapp/domain-event';
+import { EventEntity, EventLocation, TagEntity } from '@volontariapp/domain-event';
 import type { Event } from '@volontariapp/contracts-nest';
 import { EventDTO } from '../dto/common/event/event.dto.js';
 import { PointDTO } from '../dto/common/point.dto.js';
@@ -88,10 +84,7 @@ export class EventTransformer {
     }
 
     if (dto.location) {
-      entity.location = new EventLocation(
-        dto.location.latitude,
-        dto.location.longitude,
-      );
+      entity.location = new EventLocation(dto.location.latitude, dto.location.longitude);
     }
 
     if (dto.type !== undefined) entity.type = dto.type;
@@ -107,8 +100,7 @@ export class EventTransformer {
       entity.organizerId = dto.organizerId;
     }
 
-    if (dto.tags)
-      entity.tags = dto.tags.map((t) => this.tagTransformer.toEntity(t));
+    if (dto.tags) entity.tags = dto.tags.map((t) => this.tagTransformer.toEntity(t));
 
     return entity;
   }
@@ -133,9 +125,7 @@ export class EventTransformer {
     dto.state = entity.state;
     dto.awardedImpactScore = entity.awardedImpactScore;
     dto.maxParticipants = entity.maxParticipants;
-    dto.tags = entity.tags
-      ? entity.tags.map((t) => this.tagTransformer.toDto(t))
-      : [];
+    dto.tags = entity.tags ? entity.tags.map((t) => this.tagTransformer.toDto(t)) : [];
     dto.requirements = entity.requirements
       ? entity.requirements.map((r) => this.requirementTransformer.toDto(r))
       : [];

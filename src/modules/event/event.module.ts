@@ -11,11 +11,7 @@ import { EventCommandController } from './controllers/event.command.controller.j
 import { EventQueryController } from './controllers/event.query.controller.js';
 import { TagCommandController } from './controllers/tag.command.controller.js';
 import { TagQueryController } from './controllers/tag.query.controller.js';
-import {
-  TagTransformer,
-  RequirementTransformer,
-  EventTransformer,
-} from './transformers/index.js';
+import { TagTransformer, RequirementTransformer, EventTransformer } from './transformers/index.js';
 
 @Module({
   controllers: [

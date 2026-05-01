@@ -10,8 +10,7 @@ export class RequirementTransformer {
     if (dto.name !== undefined) entity.name = dto.name;
     if (dto.description !== undefined) entity.description = dto.description;
     if (dto.neededQuantity !== undefined) entity.quantity = dto.neededQuantity;
-    if (dto.currentQuantity !== undefined)
-      entity.currentQuantity = dto.currentQuantity;
+    if (dto.currentQuantity !== undefined) entity.currentQuantity = dto.currentQuantity;
     entity.isSystem = false;
     return entity;
   }

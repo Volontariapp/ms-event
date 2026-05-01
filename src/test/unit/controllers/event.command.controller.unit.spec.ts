@@ -1,16 +1,9 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { EventCommandController } from '../../../modules/event/controllers/event.command.controller.js';
-import type {
-  EventEntity,
-  EventService,
-  RequirementService,
-} from '@volontariapp/domain-event';
+import type { EventEntity, EventService, RequirementService } from '@volontariapp/domain-event';
 import type { EventTransformer } from '../../../modules/event/transformers/index.js';
 import type { EventDTO } from '../../../modules/event/dto/common/event/event.dto.js';
-import {
-  createCreateEventDTO,
-  createChangeEventStateDTO,
-} from '../../factories/event.factory.js';
+import { createCreateEventDTO, createChangeEventStateDTO } from '../../factories/event.factory.js';
 
 describe('EventCommandController (Unit)', () => {
   let controller: EventCommandController;
@@ -41,11 +34,7 @@ describe('EventCommandController (Unit)', () => {
       toEventDTO: jest.fn(),
     } as unknown as jest.Mocked<EventTransformer>;
 
-    controller = new EventCommandController(
-      eventService,
-      requirementService,
-      eventTransformer,
-    );
+    controller = new EventCommandController(eventService, requirementService, eventTransformer);
   });
 
   describe('createEvent', () => {
@@ -90,10 +79,7 @@ describe('EventCommandController (Unit)', () => {
 
       expect(result).toEqual({ event: responseDto });
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventService.changeState).toHaveBeenCalledWith(
-        dto.id,
-        dto.newState,
-      );
+      expect(eventService.changeState).toHaveBeenCalledWith(dto.id, dto.newState);
     });
   });
 

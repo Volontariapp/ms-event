@@ -119,6 +119,9 @@
     ],
     "*.json": [
       "prettier --write"
+    ],
+    "*.md": [
+      "prettier --write"
     ]
   },
   "engines": {

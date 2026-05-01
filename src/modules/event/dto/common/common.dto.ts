@@ -1,12 +1,5 @@
 import { Tag, Requirement } from '@volontariapp/contracts-nest';
-import {
-  IsString,
-  IsInt,
-  Min,
-  IsUUID,
-  IsOptional,
-  IsEnum,
-} from 'class-validator';
+import { IsString, IsInt, Min, IsUUID, IsOptional, IsEnum } from 'class-validator';
 import { TagsNames } from '@volontariapp/shared';
 
 export class TagDTO implements Tag {

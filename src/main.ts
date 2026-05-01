@@ -33,12 +33,9 @@ async function bootstrap() {
   });
   const configService = app.get(AppConfigService);
 
-  app.connectMicroservice(
-    getGrpcOptions('EVENT', configService.config.microServices.msEventUrl),
-    {
-      inheritAppConfig: true,
-    },
-  );
+  app.connectMicroservice(getGrpcOptions('EVENT', configService.config.microServices.msEventUrl), {
+    inheritAppConfig: true,
+  });
 
   await app.startAllMicroservices();
   await app.listen(configService.config.port);

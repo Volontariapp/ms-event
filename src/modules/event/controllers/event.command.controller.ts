@@ -1,10 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { Logger } from '@volontariapp/logger';
 import { GrpcMethod } from '@nestjs/microservices';
-import {
-  GRPC_SERVICES,
-  EVENT_COMMAND_METHODS,
-} from '@volontariapp/contracts-nest';
+import { GRPC_SERVICES, EVENT_COMMAND_METHODS } from '@volontariapp/contracts-nest';
 import { EventService, RequirementService } from '@volontariapp/domain-event';
 import { REQUIREMENT_NOT_FOUND } from '@volontariapp/errors-nest';
 import { CreateEventCommandDTO } from '../dto/request/command/create-event.command.dto.js';
@@ -33,58 +30,34 @@ export class EventCommandController {
     private readonly eventTransformer: EventTransformer,
   ) {}
 
-  @GrpcMethod(
-    GRPC_SERVICES.EVENT_COMMAND_SERVICE,
-    EVENT_COMMAND_METHODS.CREATE_EVENT,
-  )
-  async createEvent(
-    data: CreateEventCommandDTO,
-  ): Promise<CreateEventResponseDTO> {
+  @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.CREATE_EVENT)
+  async createEvent(data: CreateEventCommandDTO): Promise<CreateEventResponseDTO> {
     this.logger.log(`gRPC: Creating event with title: ${data.title}`);
-    const entity = await this.eventService.create(
-      this.eventTransformer.fromCreateCommand(data),
-    );
+    const entity = await this.eventService.create(this.eventTransformer.fromCreateCommand(data));
     return { event: this.eventTransformer.toEventDTO(entity) };
   }
 
-  @GrpcMethod(
-    GRPC_SERVICES.EVENT_COMMAND_SERVICE,
-    EVENT_COMMAND_METHODS.UPDATE_EVENT,
-  )
-  async updateEvent(
-    data: UpdateEventCommandDTO,
-  ): Promise<UpdateEventResponseDTO> {
+  @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.UPDATE_EVENT)
+  async updateEvent(data: UpdateEventCommandDTO): Promise<UpdateEventResponseDTO> {
     this.logger.log(`gRPC: Updating event with id: ${data.id}`);
     const partial = this.eventTransformer.fromEventDTO(data.event);
-    this.logger.debug(
-      `gRPC: Updating event payload: ${JSON.stringify(partial)}`,
-    );
+    this.logger.debug(`gRPC: Updating event payload: ${JSON.stringify(partial)}`);
     const entity = await this.eventService.update(data.id, partial);
     return { event: this.eventTransformer.toEventDTO(entity) };
   }
 
-  @GrpcMethod(
-    GRPC_SERVICES.EVENT_COMMAND_SERVICE,
-    EVENT_COMMAND_METHODS.CHANGE_EVENT_STATE,
-  )
-  async changeEventState(
-    data: ChangeEventStateCommandDTO,
-  ): Promise<ChangeEventStateResponseDTO> {
+  @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.CHANGE_EVENT_STATE)
+  async changeEventState(data: ChangeEventStateCommandDTO): Promise<ChangeEventStateResponseDTO> {
     this.logger.log(`gRPC: Changing state for event with id: ${data.id}`);
     const entity = await this.eventService.changeState(data.id, data.newState);
     return { event: this.eventTransformer.toEventDTO(entity) };
   }
 
-  @GrpcMethod(
-    GRPC_SERVICES.EVENT_COMMAND_SERVICE,
-    EVENT_COMMAND_METHODS.MANAGE_REQUIREMENTS,
-  )
+  @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.MANAGE_REQUIREMENTS)
   async manageRequirements(
     data: ManageRequirementCommandDTO,
   ): Promise<ManageRequirementsResponseDTO> {
-    this.logger.log(
-      `gRPC: Managing requirements for event with id: ${data.eventId}`,
-    );
+    this.logger.log(`gRPC: Managing requirements for event with id: ${data.eventId}`);
 
     const event = await this.eventService.findById(data.eventId);
     this.logger.debug(`gRPC: Event found: ${JSON.stringify(event)}`);
@@ -97,31 +70,23 @@ export class EventCommandController {
         createdBy: event.organizerId,
       });
       const requirements = [...(event.requirements ?? []), newReq];
-      this.logger.debug(
-        `gRPC: Requirements updated: ${JSON.stringify(requirements)}`,
-      );
+      this.logger.debug(`gRPC: Requirements updated: ${JSON.stringify(requirements)}`);
       const updatedEvent = await this.eventService.update(data.eventId, {
         requirements,
       });
-      this.logger.debug(
-        `gRPC: Event updated: ${JSON.stringify(updatedEvent.requirements)}`,
-      );
+      this.logger.debug(`gRPC: Event updated: ${JSON.stringify(updatedEvent.requirements)}`);
       return { success: true, message: 'Requirement added' };
     }
 
     if (data.remove) {
       const requirementId = data.remove.requirementId;
-      const exists = (event.requirements ?? []).some(
-        (r) => r.id === requirementId,
-      );
+      const exists = (event.requirements ?? []).some((r) => r.id === requirementId);
 
       if (!exists) {
         throw REQUIREMENT_NOT_FOUND(requirementId);
       }
 
-      const requirements = (event.requirements ?? []).filter(
-        (r) => r.id !== requirementId,
-      );
+      const requirements = (event.requirements ?? []).filter((r) => r.id !== requirementId);
       await this.eventService.update(data.eventId, { requirements });
       return { success: true, message: 'Requirement removed' };
     }
@@ -129,13 +94,8 @@ export class EventCommandController {
     return { success: false, message: 'No operation specified' };
   }
 
-  @GrpcMethod(
-    GRPC_SERVICES.EVENT_COMMAND_SERVICE,
-    EVENT_COMMAND_METHODS.DELETE_EVENT,
-  )
-  async deleteEvent(
-    data: DeleteEventCommandDTO,
-  ): Promise<DeleteEventResponseDTO> {
+  @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.DELETE_EVENT)
+  async deleteEvent(data: DeleteEventCommandDTO): Promise<DeleteEventResponseDTO> {
     this.logger.log(`gRPC: Deleting event with id: ${data.id}`);
     await this.eventService.delete(data.id);
     return { success: true };

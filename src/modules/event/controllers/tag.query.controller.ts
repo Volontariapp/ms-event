@@ -21,9 +21,7 @@ export class TagQueryController {
     this.logger.log('gRPC: Fetching tags');
     const entities =
       data.slugs.length > 0
-        ? await Promise.all(
-            data.slugs.map((slug) => this.tagService.findBySlug(slug)),
-          )
+        ? await Promise.all(data.slugs.map((slug) => this.tagService.findBySlug(slug)))
         : await this.tagService.findAll();
     return { tags: entities.map((e) => this.tagTransformer.toDto(e)) };
   }

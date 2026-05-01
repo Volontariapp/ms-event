@@ -9,11 +9,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  SearchEventsQuery,
-  EventType,
-  GeoCircle,
-} from '@volontariapp/contracts-nest';
+import { SearchEventsQuery, EventType, GeoCircle } from '@volontariapp/contracts-nest';
 import { PointDTO } from '../../common/point.dto.js';
 
 export class GeoCircleDTO implements GeoCircle {

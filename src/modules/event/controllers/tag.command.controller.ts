@@ -1,10 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { Logger } from '@volontariapp/logger';
 import { GrpcMethod } from '@nestjs/microservices';
-import {
-  GRPC_SERVICES,
-  TAG_COMMAND_METHODS,
-} from '@volontariapp/contracts-nest';
+import { GRPC_SERVICES, TAG_COMMAND_METHODS } from '@volontariapp/contracts-nest';
 import { TagService } from '@volontariapp/domain-event';
 import { CreateTagCommandDTO } from '../dto/request/command/create-tag.command.dto.js';
 import { UpdateTagCommandDTO } from '../dto/request/command/update-tag.command.dto.js';
@@ -28,9 +25,7 @@ export class TagCommandController {
   @GrpcMethod(GRPC_SERVICES.TAG_COMMAND_SERVICE, TAG_COMMAND_METHODS.CREATE_TAG)
   async createTag(data: CreateTagCommandDTO): Promise<CreateTagResponseDTO> {
     this.logger.log(`gRPC: Creating tag with label: ${data.name}`);
-    const entity = await this.tagService.create(
-      this.tagTransformer.toEntity(data),
-    );
+    const entity = await this.tagService.create(this.tagTransformer.toEntity(data));
     return { tag: this.tagTransformer.toDto(entity) };
   }
 
