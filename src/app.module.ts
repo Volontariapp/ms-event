@@ -6,10 +6,11 @@ import { EventModule } from './modules/event/event.module.js';
 import { HealthModule } from '@volontariapp/health-check-nest';
 import { TerminusModule } from '@nestjs/terminus';
 import { GrpcClientModule } from './grpc/grpc-client.module.js';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { GlobalExceptionFilter } from '@volontariapp/errors-nest';
 import { GrpcValidationPipe } from '@volontariapp/validation-nest';
 import { EventState, EventType } from '@volontariapp/contracts-nest';
+import { AuthModule, GrpcInternalGuard } from '@volontariapp/auth';
 
 @Module({
   imports: [DatabaseModule, EventModule, GrpcClientModule],
@@ -26,6 +27,7 @@ export class AppModule {
           databases: ['postgres'],
           failOnMissingProvider: true,
         }),
+        AuthModule.registerMicroservice(config.auth),
         EventModule,
         GrpcClientModule,
       ],
@@ -44,6 +46,10 @@ export class AppModule {
                 newState: EventState,
               },
             }),
+        },
+        {
+          provide: APP_GUARD,
+          useClass: GrpcInternalGuard,
         },
       ],
     };
