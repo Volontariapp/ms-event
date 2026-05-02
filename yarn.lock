@@ -3939,9 +3939,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/domain-event@npm:2.5.3":
-  version: 2.5.3
-  resolution: "@volontariapp/domain-event@npm:2.5.3"
+"@volontariapp/domain-event@npm:2.6.0":
+  version: 2.6.0
+  resolution: "@volontariapp/domain-event@npm:2.6.0"
   dependencies:
     "@nestjs/common": "npm:^11.0.1"
     "@volontariapp/contracts": "npm:4.0.7"
@@ -3949,8 +3949,9 @@ __metadata:
     "@volontariapp/errors": "npm:0.5.0"
     "@volontariapp/errors-nest": "npm:0.10.2"
     "@volontariapp/logger": "npm:0.2.3"
+    "@volontariapp/messaging": "npm:1.0.0"
     class-transformer: "npm:^0.5.1"
-  checksum: 10c0/0423af2a6fa79e6fe4446e6d4a22b41c42ad1a933926aa622db67611ff8a48ec787a61a0eacacc8a79e554748287812324d915ab75bd3811c34e363bb61b3a0c
+  checksum: 10c0/f8063154712443bdacaf69d3acc82f349c3d56acf3b83518df55f3388c17501002b6f9817af89b257ff934fe67dfe8a36a437d85b8f5b40d457c0b7ce4009a60
   languageName: node
   linkType: hard
 
@@ -4074,6 +4075,16 @@ __metadata:
   version: 0.2.3
   resolution: "@volontariapp/logger@npm:0.2.3"
   checksum: 10c0/9e4a0e25d37745bf2bc53614d44c6b460884dbe629ef2d1fa530e0a9cde4358d7c11ad3e45dcae20f571da8b0648a5e800d1c43f3acd2eddde8316e0b2179346
+  languageName: node
+  linkType: hard
+
+"@volontariapp/messaging@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@volontariapp/messaging@npm:1.0.0"
+  dependencies:
+    "@volontariapp/contracts": "npm:4.0.7"
+    "@volontariapp/database": "npm:1.12.0"
+  checksum: 10c0/9044e0b0a4b28388372a188a80e51c5501e651a9ebb139e8b3907fb873e94dc29cc1a2fdc52b135330866c4252c6f9354324a9e9f34c733cb2c697d9f1e8b8b7
   languageName: node
   linkType: hard
 
@@ -8515,7 +8526,7 @@ __metadata:
     "@volontariapp/contracts": "npm:4.0.7"
     "@volontariapp/contracts-nest": "npm:3.0.6"
     "@volontariapp/database": "npm:1.12.0"
-    "@volontariapp/domain-event": "npm:2.5.3"
+    "@volontariapp/domain-event": "npm:2.6.0"
     "@volontariapp/errors": "npm:0.5.0"
     "@volontariapp/errors-nest": "npm:0.10.2"
     "@volontariapp/eslint-config": "npm:2.2.3"
