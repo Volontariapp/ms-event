@@ -22,7 +22,7 @@ export class EventTransformer {
   /**
    * CreateEventCommandDTO → EventEntity
    */
-  fromCreateCommand(dto: CreateEventCommandDTO): EventEntity {
+  fromCreateCommand(dto: CreateEventCommandDTO, userId: string): EventEntity {
     const entity = new EventEntity();
 
     this.logger.debug(`Mapping CreateEventCommandDTO: ${JSON.stringify(dto)}`);
@@ -45,6 +45,7 @@ export class EventTransformer {
     entity.type = dto.type;
     entity.awardedImpactScore = dto.awardedImpactScore;
     entity.maxParticipants = dto.maxParticipants;
+    entity.organizerId = userId;
 
     if (dto.tagIds.length > 0) {
       entity.tags = dto.tagIds.map((id: string) => {

@@ -3,9 +3,11 @@ import { Logger } from '@volontariapp/logger';
 import { GrpcMethod } from '@nestjs/microservices';
 import { GRPC_SERVICES, TAG_QUERY_METHODS } from '@volontariapp/contracts-nest';
 import { TagService } from '@volontariapp/domain-event';
+import { CurrentUser } from '@volontariapp/auth';
 import { GetTagsQueryDTO } from '../dto/request/query/event.query.dto.js';
 import { GetTagsResponseDTO } from '../dto/response/event.response.dto.js';
 import { TagTransformer } from '../transformers/index.js';
+import type { AuthUser } from '@volontariapp/auth';
 
 @Controller()
 export class TagQueryController {
@@ -17,8 +19,8 @@ export class TagQueryController {
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.TAG_QUERY_SERVICE, TAG_QUERY_METHODS.GET_TAGS)
-  async getTags(data: GetTagsQueryDTO): Promise<GetTagsResponseDTO> {
-    this.logger.log('gRPC: Fetching tags');
+  async getTags(data: GetTagsQueryDTO, @CurrentUser() user: AuthUser): Promise<GetTagsResponseDTO> {
+    this.logger.log(`gRPC: Fetching tags, user: ${user.id}`);
     const entities =
       data.slugs.length > 0
         ? await Promise.all(data.slugs.map((slug) => this.tagService.findBySlug(slug)))
