@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Logger } from '@volontariapp/logger';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, TAG_COMMAND_METHODS } from '@volontariapp/contracts-nest';
 import { TagService } from '@volontariapp/domain-event';
 import { CurrentUser } from '@volontariapp/auth';
@@ -26,7 +26,7 @@ export class TagCommandController {
 
   @GrpcMethod(GRPC_SERVICES.TAG_COMMAND_SERVICE, TAG_COMMAND_METHODS.CREATE_TAG)
   async createTag(
-    data: CreateTagCommandDTO,
+    @Payload() data: CreateTagCommandDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<CreateTagResponseDTO> {
     this.logger.log(`gRPC: Creating tag with label: ${data.name}, user: ${user.id}`);
@@ -36,7 +36,7 @@ export class TagCommandController {
 
   @GrpcMethod(GRPC_SERVICES.TAG_COMMAND_SERVICE, TAG_COMMAND_METHODS.UPDATE_TAG)
   async updateTag(
-    data: UpdateTagCommandDTO,
+    @Payload() data: UpdateTagCommandDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<UpdateTagResponseDTO> {
     this.logger.log(`gRPC: Updating tag with id: ${data.id}, user: ${user.id}`);
@@ -49,7 +49,7 @@ export class TagCommandController {
 
   @GrpcMethod(GRPC_SERVICES.TAG_COMMAND_SERVICE, TAG_COMMAND_METHODS.DELETE_TAG)
   async deleteTag(
-    data: DeleteTagCommandDTO,
+    @Payload() data: DeleteTagCommandDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<DeleteTagResponseDTO> {
     this.logger.log(`gRPC: Deleting tag with id: ${data.id}, user: ${user.id}`);

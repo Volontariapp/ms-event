@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Logger } from '@volontariapp/logger';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, EVENT_QUERY_METHODS } from '@volontariapp/contracts-nest';
 import { EventService } from '@volontariapp/domain-event';
 import { CurrentUser } from '@volontariapp/auth';
@@ -29,7 +29,7 @@ export class EventQueryController {
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.GET_EVENT)
   async getEvent(
-    data: GetEventQueryDTO,
+    @Payload() data: GetEventQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<GetEventResponseDTO> {
     this.logger.log(`gRPC: Fetching event with id: ${data.id}, user: ${user.id}`);
@@ -39,7 +39,7 @@ export class EventQueryController {
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.SEARCH_EVENTS)
   async searchEvents(
-    data: SearchEventsQueryDTO,
+    @Payload() data: SearchEventsQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<SearchEventsResponseDTO> {
     this.logger.log(`gRPC: Searching events with term: ${data.searchTerm}, user: ${user.id}`);
@@ -50,7 +50,7 @@ export class EventQueryController {
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.LIST_REQUIREMENTS)
   async listRequirements(
-    data: ListRequirementsQueryDTO,
+    @Payload() data: ListRequirementsQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<ListRequirementsResponseDTO> {
     this.logger.log(
