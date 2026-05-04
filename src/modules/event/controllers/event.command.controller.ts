@@ -1,9 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { Logger } from '@volontariapp/logger';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, EVENT_COMMAND_METHODS } from '@volontariapp/contracts-nest';
 import { EventService, RequirementService } from '@volontariapp/domain-event';
 import { REQUIREMENT_NOT_FOUND } from '@volontariapp/errors-nest';
+import { CurrentUser } from '@volontariapp/auth';
 import { CreateEventCommandDTO } from '../dto/request/command/create-event.command.dto.js';
 import { UpdateEventCommandDTO } from '../dto/request/command/update-event.command.dto.js';
 import { ChangeEventStateCommandDTO } from '../dto/request/command/change-event-state.command.dto.js';
@@ -17,6 +18,7 @@ import {
   DeleteEventResponseDTO,
 } from '../dto/response/event.response.dto.js';
 import { EventTransformer } from '../transformers/index.js';
+import type { AuthUser } from '@volontariapp/auth';
 
 @Controller()
 export class EventCommandController {
@@ -31,15 +33,23 @@ export class EventCommandController {
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.CREATE_EVENT)
-  async createEvent(data: CreateEventCommandDTO): Promise<CreateEventResponseDTO> {
-    this.logger.log(`gRPC: Creating event with title: ${data.title}`);
-    const entity = await this.eventService.create(this.eventTransformer.fromCreateCommand(data));
+  async createEvent(
+    @Payload() data: CreateEventCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<CreateEventResponseDTO> {
+    this.logger.log(`gRPC: Creating event with title: ${data.title}, organizer: ${user.id}`);
+    const entity = await this.eventService.create(
+      this.eventTransformer.fromCreateCommand(data, user.id),
+    );
     return { event: this.eventTransformer.toEventDTO(entity) };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.UPDATE_EVENT)
-  async updateEvent(data: UpdateEventCommandDTO): Promise<UpdateEventResponseDTO> {
-    this.logger.log(`gRPC: Updating event with id: ${data.id}`);
+  async updateEvent(
+    @Payload() data: UpdateEventCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<UpdateEventResponseDTO> {
+    this.logger.log(`gRPC: Updating event with id: ${data.id}, user: ${user.id}`);
     const partial = this.eventTransformer.fromEventDTO(data.event);
     this.logger.debug(`gRPC: Updating event payload: ${JSON.stringify(partial)}`);
     const entity = await this.eventService.update(data.id, partial);
@@ -47,17 +57,23 @@ export class EventCommandController {
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.CHANGE_EVENT_STATE)
-  async changeEventState(data: ChangeEventStateCommandDTO): Promise<ChangeEventStateResponseDTO> {
-    this.logger.log(`gRPC: Changing state for event with id: ${data.id}`);
+  async changeEventState(
+    @Payload() data: ChangeEventStateCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<ChangeEventStateResponseDTO> {
+    this.logger.log(`gRPC: Changing state for event with id: ${data.id}, user: ${user.id}`);
     const entity = await this.eventService.changeState(data.id, data.newState);
     return { event: this.eventTransformer.toEventDTO(entity) };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.MANAGE_REQUIREMENTS)
   async manageRequirements(
-    data: ManageRequirementCommandDTO,
+    @Payload() data: ManageRequirementCommandDTO,
+    @CurrentUser() user: AuthUser,
   ): Promise<ManageRequirementsResponseDTO> {
-    this.logger.log(`gRPC: Managing requirements for event with id: ${data.eventId}`);
+    this.logger.log(
+      `gRPC: Managing requirements for event with id: ${data.eventId}, user: ${user.id}`,
+    );
 
     const event = await this.eventService.findById(data.eventId);
     this.logger.debug(`gRPC: Event found: ${JSON.stringify(event)}`);
@@ -95,8 +111,11 @@ export class EventCommandController {
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.DELETE_EVENT)
-  async deleteEvent(data: DeleteEventCommandDTO): Promise<DeleteEventResponseDTO> {
-    this.logger.log(`gRPC: Deleting event with id: ${data.id}`);
+  async deleteEvent(
+    @Payload() data: DeleteEventCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<DeleteEventResponseDTO> {
+    this.logger.log(`gRPC: Deleting event with id: ${data.id}, user: ${user.id}`);
     await this.eventService.delete(data.id);
     return { success: true };
   }

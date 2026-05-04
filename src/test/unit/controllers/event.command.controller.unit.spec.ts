@@ -4,6 +4,7 @@ import type { EventEntity, EventService, RequirementService } from '@volontariap
 import type { EventTransformer } from '../../../modules/event/transformers/index.js';
 import type { EventDTO } from '../../../modules/event/dto/common/event/event.dto.js';
 import { createCreateEventDTO, createChangeEventStateDTO } from '../../factories/event.factory.js';
+import { AuthUserFactory } from '../../../__test-utils__/factories/auth-user.factory.js';
 
 describe('EventCommandController (Unit)', () => {
   let controller: EventCommandController;
@@ -39,6 +40,7 @@ describe('EventCommandController (Unit)', () => {
 
   describe('createEvent', () => {
     it('should create an event and return the response', async () => {
+      const user = AuthUserFactory.create();
       const dto = createCreateEventDTO();
       const entity = { id: 'uuid', title: dto.title } as unknown as EventEntity;
       const responseDto = {
@@ -52,9 +54,11 @@ describe('EventCommandController (Unit)', () => {
       eventService.create.mockResolvedValue(entity);
       eventTransformer.toEventDTO.mockReturnValue(responseDto);
 
-      const result = await controller.createEvent(dto);
+      const result = await controller.createEvent(dto, user);
 
       expect(result).toEqual({ event: responseDto });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(eventTransformer.fromCreateCommand).toHaveBeenCalledWith(dto, user.id);
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventService.create).toHaveBeenCalled();
     });
@@ -62,6 +66,7 @@ describe('EventCommandController (Unit)', () => {
 
   describe('changeEventState', () => {
     it('should change event state and return the response', async () => {
+      const user = AuthUserFactory.create();
       const dto = createChangeEventStateDTO();
       const entity = {
         id: dto.id,
@@ -75,7 +80,7 @@ describe('EventCommandController (Unit)', () => {
       eventService.changeState.mockResolvedValue(entity);
       eventTransformer.toEventDTO.mockReturnValue(responseDto);
 
-      const result = await controller.changeEventState(dto);
+      const result = await controller.changeEventState(dto, user);
 
       expect(result).toEqual({ event: responseDto });
       // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -85,10 +90,11 @@ describe('EventCommandController (Unit)', () => {
 
   describe('deleteEvent', () => {
     it('should delete an event and return success', async () => {
+      const user = AuthUserFactory.create();
       const dto = { id: 'uuid' };
       eventService.delete.mockResolvedValue(undefined);
 
-      const result = await controller.deleteEvent(dto);
+      const result = await controller.deleteEvent(dto, user);
 
       expect(result).toEqual({ success: true });
       // eslint-disable-next-line @typescript-eslint/unbound-method
