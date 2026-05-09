@@ -1,5 +1,4 @@
 {
-  "port": "PORT",
   "db": {
     "host": "DB_HOST",
     "port": "DB_PORT",
@@ -24,5 +23,6 @@
     "msUserUrl": "MS_USER_URL",
     "msPostUrl": "MS_POST_URL",
     "msEventUrl": "MS_EVENT_URL"
-  }
+  },
+  "port": "PORT"
 }

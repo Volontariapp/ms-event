@@ -1,26 +1,59 @@
-node_modules
-dist
-coverage
-.git
-.gitignore
-.gitmodules
-.claude
-.github
-*.md
-npm-packages
-api-gateway
-nativapp
-ms-*
-!ms-event # If we are at root and this is a general dockerfile, but we are supposed to be at root of ms-event
-dockerfile
-Dockerfile
+# ==========================================================
+# DEPENDENCIES & PACKAGE MANAGERS
+# ==========================================================
+node_modules/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/install-state.gz
+
+
+# ==========================================================
+# BUILD OUTPUTS & TEMPORARY FILES
+# ==========================================================
+dist/
+build/
+coverage/
+.cache/
+
+# ==========================================================
+# CONFIGURATION & TOOLS (IDE, LINTERS)
+# ==========================================================
+.vscode/
 .editorconfig
 .prettierrc
 eslint.config.mjs
 tsconfig.build.json
 nest-cli.json
-.vscode
-.yarn/cache
-.yarn/unplugged
-.yarn/install-state.gz
-build
+.claude/
+*.md
+
+# ==========================================================
+# DOCKER & CI/CD
+# ==========================================================
+dockerfile
+Dockerfile
+.github/
+docker-compose.yml
+
+# ==========================================================
+# GIT & VERSION CONTROL
+# ==========================================================
+.git/
+.gitignore
+.gitmodules
+
+# ==========================================================
+# MONOREPO / OTHER SERVICES
+# (On ignore les autres micro-services pour isoler celui-ci)
+# ==========================================================
+npm-packages/
+api-gateway/
+nativapp/
+ms-*/
+!ms-event/ 
+
+# ==========================================================
+# SECRETS & ENVIRONMENTS (CRITICAL)
+# ==========================================================
+.env
+.env.*
