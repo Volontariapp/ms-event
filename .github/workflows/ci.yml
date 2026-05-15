@@ -5,6 +5,7 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
 
 jobs:
   ci:
@@ -23,4 +24,14 @@ jobs:
       db-user: "user"
       db-password: "password"
       port: 3003
+    secrets: inherit
+
+  ci-docker:
+    needs: ci
+    permissions:
+      contents: read
+      packages: write
+    uses: Volontariapp/ci-tools/.github/workflows/docker-build-push.yml@main
+    with:
+      service-name: ms-event
     secrets: inherit
