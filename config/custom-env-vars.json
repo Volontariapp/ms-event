@@ -22,7 +22,8 @@
   "microServices": {
     "msUserUrl": "MS_USER_URL",
     "msPostUrl": "MS_POST_URL",
-    "msEventUrl": "MS_EVENT_URL"
+    "msEventUrl": "MS_EVENT_URL",
+    "msSocialUrl": "MS_SOCIAL_URL"
   },
   "port": "PORT"
 }
