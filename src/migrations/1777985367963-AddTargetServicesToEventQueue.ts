@@ -28,8 +28,8 @@ export class AddTargetServicesToEventQueue1777985367963 implements MigrationInte
           END IF;
 
           INSERT INTO event_queue (type, emitter, payload, version, updated_at, target_services)
-          VALUES (TG_ARGV[0], TG_ARGV[1], payload_data, 1, now(), ARRAY['social']);
-          
+          VALUES (TG_ARGV[0], TG_ARGV[1], payload_data, 1, now(), ARRAY['ms-social']);
+
           IF (TG_OP = 'DELETE') THEN
               RETURN OLD;
           END IF;
