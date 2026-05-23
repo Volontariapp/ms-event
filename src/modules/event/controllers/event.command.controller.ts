@@ -103,7 +103,7 @@ export class EventCommandController {
       }
 
       const requirements = (event.requirements ?? []).filter((r) => r.id !== requirementId);
-      await this.eventService.update(data.eventId, { requirements });
+      await this.eventService.update(data.eventId, { requirements }); // Note: event updates do not have updatedBy yet, but requirements don't have a separate update endpoint here.
       return { success: true, message: 'Requirement removed' };
     }
 

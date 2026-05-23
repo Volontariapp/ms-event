@@ -30,7 +30,9 @@ export class TagCommandController {
     @CurrentUser() user: AuthUser,
   ): Promise<CreateTagResponseDTO> {
     this.logger.log(`gRPC: Creating tag with label: ${data.name}, user: ${user.id}`);
-    const entity = await this.tagService.create(this.tagTransformer.toEntity(data));
+    const entityData = this.tagTransformer.toEntity(data);
+    entityData.updatedBy = user.id;
+    const entity = await this.tagService.create(entityData);
     return { tag: this.tagTransformer.toDto(entity) };
   }
 
@@ -43,6 +45,7 @@ export class TagCommandController {
     const entity = await this.tagService.update(data.id, {
       name: data.name,
       balise: data.balise,
+      updatedBy: user.id,
     });
     return { tag: this.tagTransformer.toDto(entity) };
   }

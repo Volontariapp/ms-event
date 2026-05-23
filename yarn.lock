@@ -4021,9 +4021,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/database@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@volontariapp/database@npm:2.0.0"
+"@volontariapp/database@npm:3.0.0, @volontariapp/database@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@volontariapp/database@npm:3.0.0"
   dependencies:
     "@volontariapp/bridge": "npm:1.0.3"
     "@volontariapp/config": "npm:3.1.1"
@@ -4036,23 +4036,23 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
   peerDependencies:
     typeorm: ^0.3.28
-  checksum: 10c0/04c4d7b8fc950f5020d2d6b9c52d31e348df5c73b6d939eed5840f55c6ae36e7a643069fed79c4b8e37426b166dba26184db50d1035b2aa6ce8a23bb04274984
+  checksum: 10c0/8fc575745cda031d34a4474d4b99928e2c469c8f6af0c43d6e26e6946fade8411d59ae68a8445fa7c5c11235d0af9c8ade0937d8e949b67cfbf3595025733b0f
   languageName: node
   linkType: hard
 
-"@volontariapp/domain-event@npm:2.8.0-snap-123f8fe":
-  version: 2.8.0-snap-123f8fe
-  resolution: "@volontariapp/domain-event@npm:2.8.0-snap-123f8fe"
+"@volontariapp/domain-event@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@volontariapp/domain-event@npm:3.0.0"
   dependencies:
     "@nestjs/common": "npm:^11.0.1"
     "@volontariapp/contracts": "npm:4.0.11"
-    "@volontariapp/database": "npm:2.0.0"
+    "@volontariapp/database": "npm:3.0.0"
     "@volontariapp/errors": "npm:0.5.2"
     "@volontariapp/errors-nest": "npm:0.11.2"
     "@volontariapp/logger": "npm:0.2.5"
-    "@volontariapp/messaging": "npm:2.1.0-snap-123f8fe"
+    "@volontariapp/messaging": "npm:2.1.1"
     class-transformer: "npm:^0.5.1"
-  checksum: 10c0/17aaa05b8464f1023e9bcc89702f38ab30622399e89cfb37c73cef72915e3f118d3a570dcf8385764a4247082e62391c1dbe4caa201ea7df2881ed54fb8ff074
+  checksum: 10c0/3e1d97cfca539a1c56f55e9ca099b236244cdc9084129e354f48802a531c552666f317f93f4ef959c7c41f643658eec08994d9eedeed8d75f53d325a672ad0e5
   languageName: node
   linkType: hard
 
@@ -4153,13 +4153,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/messaging@npm:2.1.0-snap-123f8fe":
-  version: 2.1.0-snap-123f8fe
-  resolution: "@volontariapp/messaging@npm:2.1.0-snap-123f8fe"
+"@volontariapp/messaging@npm:2.1.1":
+  version: 2.1.1
+  resolution: "@volontariapp/messaging@npm:2.1.1"
   dependencies:
     "@volontariapp/contracts": "npm:4.0.11"
-    "@volontariapp/database": "npm:2.0.0"
-  checksum: 10c0/0e2f402159b9ab7b325d8c263a5b554e33105f1dc627477ec860f90472ff2aa9a1336eb05f5cc22bf7b122bf2be3dc6966b53d817370952fb7ae7fec707a8d11
+    "@volontariapp/database": "npm:3.0.0"
+  checksum: 10c0/6e42d5505e464fd63585d41208436e2c6874aedf231a6f3955113f7e5c535697d60d7826e05e2d8255d1be02effe52587ae0717b689ddbc7acc2f0dec0e86f57
   languageName: node
   linkType: hard
 
@@ -8600,8 +8600,8 @@ __metadata:
     "@volontariapp/config": "npm:3.1.1"
     "@volontariapp/contracts": "npm:4.0.11"
     "@volontariapp/contracts-nest": "npm:3.1.3"
-    "@volontariapp/database": "npm:2.0.0"
-    "@volontariapp/domain-event": "npm:2.8.0-snap-123f8fe"
+    "@volontariapp/database": "npm:^3.0.0"
+    "@volontariapp/domain-event": "npm:^3.0.0"
     "@volontariapp/errors": "npm:0.5.2"
     "@volontariapp/errors-nest": "npm:0.11.2"
     "@volontariapp/eslint-config": "npm:2.2.4"
