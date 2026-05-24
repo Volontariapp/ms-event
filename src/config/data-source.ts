@@ -37,6 +37,8 @@ export const AppDataSource = new DataSource({
     JobsOutboxModel,
     JobAuditModel,
   ],
-  migrations: [join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations', '*.{ts,js}')],
+  migrations: [
+    join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations', '**', '*.{ts,js}'),
+  ],
   synchronize: false,
 });
