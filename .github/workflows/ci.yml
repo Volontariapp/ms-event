@@ -9,14 +9,14 @@ on:
 
 jobs:
   ci:
-    uses: Volontariapp/ci-tools/.github/workflows/ci-service.yml@main
+    uses: Volontariapp/ci-tools/.github/workflows/services/ci.yml@main
     with:
       service-name: ms-event
     secrets: inherit
 
   smoke-test:
     needs: ci
-    uses: Volontariapp/ci-tools/.github/workflows/ci-docker-smoke.yml@main
+    uses: Volontariapp/ci-tools/.github/workflows/services/docker-smoke.yml@main
     with:
       service-name: ms-event
       db-image: "postgis/postgis:16-3.4"
@@ -31,17 +31,17 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: Volontariapp/ci-tools/.github/workflows/docker-build-push.yml@main
+    uses: Volontariapp/ci-tools/.github/workflows/services/docker-build-push.yml@main
     with:
       service-name: ms-event
     secrets: inherit
 
   e2e:
     needs: [ci-docker, smoke-test]
-    uses: Volontariapp/ci-tools/.github/workflows/e2e-orchestrator.yml@main
+    uses: Volontariapp/ci-tools/.github/workflows/e2e/orchestrator.yml@main
     secrets: inherit
 
   validate-e2e-matrix:
-    uses: Volontariapp/ci-tools/.github/workflows/e2e-matrix-checker.yml@main
+    uses: Volontariapp/ci-tools/.github/workflows/e2e/matrix-checker.yml@main
     with:
       service-name: ms-event
