@@ -9,22 +9,22 @@ import type {
 } from '@volontariapp/contracts-nest';
 import { EventService } from '@volontariapp/domain-event';
 import { CurrentUser, InternalToken } from '@volontariapp/auth';
-import { SearchEventsQueryDTO } from '../dto/request/query/search-events.query.dto.js';
+import { SearchEventsQueryDTO } from '../../dto/request/query/search-events.query.dto.js';
 import {
   GetEventQueryDTO,
   ListRequirementsQueryDTO,
-} from '../dto/request/query/event.query.dto.js';
+} from '../../dto/request/query/event.query.dto.js';
 import {
   GetEventResponseDTO,
   SearchEventsResponseDTO,
   ListRequirementsResponseDTO,
-} from '../dto/response/event.response.dto.js';
-import { GetEventsByIdsQueryDTO } from '../dto/request/query/get-events-by-ids.query.dto.js';
-import { GetEventsByIdsResponseDTO } from '../dto/response/get-events-by-ids.response.dto.js';
-import { EventTransformer, RequirementTransformer } from '../transformers/index.js';
+} from '../../dto/response/event.response.dto.js';
+import { GetEventsByIdsQueryDTO } from '../../dto/request/query/get-events-by-ids.query.dto.js';
+import { GetEventsByIdsResponseDTO } from '../../dto/response/get-events-by-ids.response.dto.js';
+import { EventTransformer, RequirementTransformer } from '../../transformers/index.js';
 import type { EventEntity } from '@volontariapp/domain-event';
 import type { AuthUser } from '@volontariapp/auth';
-import { SocialParticipationQueryClientService } from '../clients/social-participation.query-client.js';
+import { SocialParticipationQueryClientService } from '../../clients/social-participation.query-client.js';
 
 @Controller()
 export class EventQueryController {

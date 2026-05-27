@@ -4,9 +4,9 @@ import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, TAG_QUERY_METHODS } from '@volontariapp/contracts-nest';
 import { TagService } from '@volontariapp/domain-event';
 import { CurrentUser } from '@volontariapp/auth';
-import { GetTagsQueryDTO } from '../dto/request/query/event.query.dto.js';
-import { GetTagsResponseDTO } from '../dto/response/event.response.dto.js';
-import { TagTransformer } from '../transformers/index.js';
+import { GetTagsQueryDTO } from '../../dto/request/query/event.query.dto.js';
+import { GetTagsResponseDTO } from '../../dto/response/event.response.dto.js';
+import { TagTransformer } from '../../transformers/index.js';
 import type { AuthUser } from '@volontariapp/auth';
 
 @Controller()

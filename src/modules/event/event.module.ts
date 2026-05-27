@@ -7,10 +7,10 @@ import {
   PostgresTagRepository,
   PostgresRequirementRepository,
 } from '@volontariapp/domain-event';
-import { EventCommandController } from './controllers/event.command.controller.js';
-import { EventQueryController } from './controllers/event.query.controller.js';
-import { TagCommandController } from './controllers/tag.command.controller.js';
-import { TagQueryController } from './controllers/tag.query.controller.js';
+import { EventCommandController } from './controllers/commands/event.command.controller.js';
+import { EventQueryController } from './controllers/queries/event.query.controller.js';
+import { TagCommandController } from './controllers/commands/tag.command.controller.js';
+import { TagQueryController } from './controllers/queries/tag.query.controller.js';
 import { TagTransformer, RequirementTransformer, EventTransformer } from './transformers/index.js';
 import { SocialParticipationQueryClientService } from './clients/social-participation.query-client.js';
 

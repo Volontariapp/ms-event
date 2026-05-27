@@ -1,16 +1,22 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { EventCommandController } from '../../../modules/event/controllers/event.command.controller.js';
+import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
+import { EventCommandController } from '../../../modules/event/controllers/commands/event.command.controller.js';
 import type { EventEntity, EventService, RequirementService } from '@volontariapp/domain-event';
 import type { EventTransformer } from '../../../modules/event/transformers/index.js';
 import type { EventDTO } from '../../../modules/event/dto/common/event/event.dto.js';
 import { createCreateEventDTO, createChangeEventStateDTO } from '../../factories/event.factory.js';
 import { AuthUserFactory } from '../../../__test-utils__/factories/auth-user.factory.js';
+import type { DataSource } from 'typeorm';
+import { JobsOutboxModel } from '@volontariapp/database';
+import { JobsOutboxRepository } from '@volontariapp/outbox';
+import { EventsJobType } from '@volontariapp/messaging';
+import { NotFoundError, PartialContentError } from '@volontariapp/errors';
 
 describe('EventCommandController (Unit)', () => {
   let controller: EventCommandController;
   let eventService: jest.Mocked<EventService>;
   let requirementService: jest.Mocked<RequirementService>;
   let eventTransformer: jest.Mocked<EventTransformer>;
+  let mockDataSource: jest.Mocked<DataSource>;
 
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -35,7 +41,16 @@ describe('EventCommandController (Unit)', () => {
       toEventDTO: jest.fn(),
     } as unknown as jest.Mocked<EventTransformer>;
 
-    controller = new EventCommandController(eventService, requirementService, eventTransformer);
+    mockDataSource = {
+      getRepository: jest.fn().mockReturnValue({}),
+    } as unknown as jest.Mocked<DataSource>;
+
+    controller = new EventCommandController(
+      eventService,
+      requirementService,
+      eventTransformer,
+      mockDataSource,
+    );
   });
 
   describe('createEvent', () => {
@@ -99,6 +114,54 @@ describe('EventCommandController (Unit)', () => {
       expect(result).toEqual({ success: true });
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventService.delete).toHaveBeenCalledWith(dto.id);
+    });
+  });
+
+  describe('Fallback mechanism', () => {
+    let createSpy: jest.SpiedFunction<typeof JobsOutboxRepository.prototype.create>;
+
+    beforeEach(() => {
+      createSpy = jest
+        .spyOn(JobsOutboxRepository.prototype, 'create')
+        .mockImplementation(() => Promise.resolve({} as never));
+    });
+
+    afterEach(() => {
+      createSpy.mockRestore();
+    });
+
+    it('should create a fallback job in outbox when an unexpected error occurs', async () => {
+      const user = AuthUserFactory.create();
+      const dto = { id: 'uuid' };
+      const spyGetRepo = jest.spyOn(mockDataSource, 'getRepository');
+      const mockError = new Error('Unexpected DB Error');
+
+      eventService.delete.mockRejectedValue(mockError);
+
+      await expect(controller.deleteEvent(dto, user)).rejects.toThrow(PartialContentError);
+
+      expect(spyGetRepo).toHaveBeenCalledWith(JobsOutboxModel);
+
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: EventsJobType.FALLBACK_DELETE_EVENT,
+          emitter: 'ms-event',
+          emitterId: user.id,
+          target: 'fallback-event-queue',
+        }),
+      );
+    });
+
+    it('should NOT create a fallback job for Api Errors like 404', async () => {
+      const user = AuthUserFactory.create();
+      const dto = { id: 'uuid' };
+      const mockError = new NotFoundError('Event not found');
+
+      eventService.delete.mockRejectedValue(mockError);
+
+      await expect(controller.deleteEvent(dto, user)).rejects.toThrow('Event not found');
+
+      expect(createSpy).not.toHaveBeenCalled();
     });
   });
 });

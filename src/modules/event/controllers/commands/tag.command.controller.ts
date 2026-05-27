@@ -1,0 +1,72 @@
+import { Controller } from '@nestjs/common';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
+import { GRPC_SERVICES, TAG_COMMAND_METHODS } from '@volontariapp/contracts-nest';
+import { TagService } from '@volontariapp/domain-event';
+import { CurrentUser } from '@volontariapp/auth';
+import { CreateTagCommandDTO } from '../../dto/request/command/create-tag.command.dto.js';
+import { UpdateTagCommandDTO } from '../../dto/request/command/update-tag.command.dto.js';
+import { DeleteTagCommandDTO } from '../../dto/request/command/delete-tag.command.dto.js';
+import {
+  CreateTagResponseDTO,
+  UpdateTagResponseDTO,
+  DeleteTagResponseDTO,
+} from '../../dto/response/event.response.dto.js';
+import { TagTransformer } from '../../transformers/index.js';
+import type { AuthUser } from '@volontariapp/auth';
+import { EventsJobType } from '@volontariapp/messaging';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { BaseCommandController } from './base.command.controller.js';
+
+@Controller()
+export class TagCommandController extends BaseCommandController {
+  constructor(
+    private readonly tagService: TagService,
+    private readonly tagTransformer: TagTransformer,
+    @InjectDataSource() dataSource: DataSource,
+  ) {
+    super(dataSource);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.TAG_COMMAND_SERVICE, TAG_COMMAND_METHODS.CREATE_TAG)
+  async createTag(
+    @Payload() data: CreateTagCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<CreateTagResponseDTO> {
+    return this.withFallback(EventsJobType.FALLBACK_CREATE_TAG, user.id, data, async () => {
+      this.logger.log(`gRPC: Creating tag with label: ${data.name}, user: ${user.id}`);
+      const entityData = this.tagTransformer.toEntity(data);
+      entityData.updatedBy = user.id;
+      const entity = await this.tagService.create(entityData);
+      return { tag: this.tagTransformer.toDto(entity) };
+    });
+  }
+
+  @GrpcMethod(GRPC_SERVICES.TAG_COMMAND_SERVICE, TAG_COMMAND_METHODS.UPDATE_TAG)
+  async updateTag(
+    @Payload() data: UpdateTagCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<UpdateTagResponseDTO> {
+    return this.withFallback(EventsJobType.FALLBACK_UPDATE_TAG, user.id, data, async () => {
+      this.logger.log(`gRPC: Updating tag with id: ${data.id}, user: ${user.id}`);
+      const entity = await this.tagService.update(data.id, {
+        name: data.name,
+        balise: data.balise,
+        updatedBy: user.id,
+      });
+      return { tag: this.tagTransformer.toDto(entity) };
+    });
+  }
+
+  @GrpcMethod(GRPC_SERVICES.TAG_COMMAND_SERVICE, TAG_COMMAND_METHODS.DELETE_TAG)
+  async deleteTag(
+    @Payload() data: DeleteTagCommandDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<DeleteTagResponseDTO> {
+    return this.withFallback(EventsJobType.FALLBACK_DELETE_TAG, user.id, data, async () => {
+      this.logger.log(`gRPC: Deleting tag with id: ${data.id}, user: ${user.id}`);
+      await this.tagService.delete(data.id);
+      return { success: true };
+    });
+  }
+}
