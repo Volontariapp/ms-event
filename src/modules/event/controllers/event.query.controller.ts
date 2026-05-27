@@ -2,8 +2,13 @@ import { Controller } from '@nestjs/common';
 import { Logger } from '@volontariapp/logger';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, EVENT_QUERY_METHODS } from '@volontariapp/contracts-nest';
+import type {
+  GetUserCreatedEventsQuery,
+  GetUserParticipatedEventsQuery,
+  GetUserWishedEventsQuery,
+} from '@volontariapp/contracts-nest';
 import { EventService } from '@volontariapp/domain-event';
-import { CurrentUser } from '@volontariapp/auth';
+import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import { SearchEventsQueryDTO } from '../dto/request/query/search-events.query.dto.js';
 import {
   GetEventQueryDTO,
@@ -14,8 +19,12 @@ import {
   SearchEventsResponseDTO,
   ListRequirementsResponseDTO,
 } from '../dto/response/event.response.dto.js';
+import { GetEventsByIdsQueryDTO } from '../dto/request/query/get-events-by-ids.query.dto.js';
+import { GetEventsByIdsResponseDTO } from '../dto/response/get-events-by-ids.response.dto.js';
 import { EventTransformer, RequirementTransformer } from '../transformers/index.js';
+import type { EventEntity } from '@volontariapp/domain-event';
 import type { AuthUser } from '@volontariapp/auth';
+import { SocialParticipationQueryClientService } from '../clients/social-participation.query-client.js';
 
 @Controller()
 export class EventQueryController {
@@ -25,6 +34,7 @@ export class EventQueryController {
     private readonly eventService: EventService,
     private readonly eventTransformer: EventTransformer,
     private readonly requirementTransformer: RequirementTransformer,
+    private readonly socialParticipationClient: SocialParticipationQueryClientService,
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.GET_EVENT)
@@ -35,6 +45,20 @@ export class EventQueryController {
     this.logger.log(`gRPC: Fetching event with id: ${data.id}, user: ${user.id}`);
     const entity = await this.eventService.findById(data.id);
     return { event: this.eventTransformer.toEventDTO(entity) };
+  }
+
+  @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetEventsByIds')
+  async getEventsByIds(
+    @Payload() data: GetEventsByIdsQueryDTO,
+    @CurrentUser() user: AuthUser,
+  ): Promise<GetEventsByIdsResponseDTO> {
+    this.logger.log(`gRPC: Fetching events by ids: ${String(data.ids.length)}, user: ${user.id}`);
+    const eventsEntities = await Promise.all(
+      data.ids.map((id) => this.eventService.findById(id).catch(() => null)),
+    );
+    const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
+    const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
+    return { events, totalCount: events.length };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.SEARCH_EVENTS)
@@ -61,5 +85,65 @@ export class EventQueryController {
       this.requirementTransformer.toDto(r),
     );
     return { requirements };
+  }
+
+  @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserCreatedEvents')
+  async getUserCreatedEvents(
+    @Payload() data: GetUserCreatedEventsQuery,
+    @CurrentUser() user: AuthUser,
+    @InternalToken() token: string,
+  ): Promise<GetEventsByIdsResponseDTO> {
+    this.logger.log(`gRPC: Fetching created events for user: ${user.id}`);
+    const page = data.pagination?.page ?? 1;
+    const limit = data.pagination?.limit ?? 10;
+
+    const ids = await this.socialParticipationClient.getUserCreatedEvents(token, limit, page);
+
+    const eventsEntities = await Promise.all(
+      ids.map((id) => this.eventService.findById(id).catch(() => null)),
+    );
+    const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
+    const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
+    return { events, totalCount: events.length };
+  }
+
+  @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserParticipatedEvents')
+  async getUserParticipatedEvents(
+    @Payload() data: GetUserParticipatedEventsQuery,
+    @CurrentUser() user: AuthUser,
+    @InternalToken() token: string,
+  ): Promise<GetEventsByIdsResponseDTO> {
+    this.logger.log(`gRPC: Fetching participated events for user: ${user.id}`);
+    const page = data.pagination?.page ?? 1;
+    const limit = data.pagination?.limit ?? 10;
+
+    const ids = await this.socialParticipationClient.getUserParticipatedEvents(token, limit, page);
+
+    const eventsEntities = await Promise.all(
+      ids.map((id) => this.eventService.findById(id).catch(() => null)),
+    );
+    const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
+    const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
+    return { events, totalCount: events.length };
+  }
+
+  @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserWishedEvents')
+  async getUserWishedEvents(
+    @Payload() data: GetUserWishedEventsQuery,
+    @CurrentUser() user: AuthUser,
+    @InternalToken() token: string,
+  ): Promise<GetEventsByIdsResponseDTO> {
+    this.logger.log(`gRPC: Fetching wished events for user: ${user.id}`);
+    const page = data.pagination?.page ?? 1;
+    const limit = data.pagination?.limit ?? 10;
+
+    const ids = await this.socialParticipationClient.getUserWishedEvents(token, limit, page);
+
+    const eventsEntities = await Promise.all(
+      ids.map((id) => this.eventService.findById(id).catch(() => null)),
+    );
+    const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
+    const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
+    return { events, totalCount: events.length };
   }
 }
