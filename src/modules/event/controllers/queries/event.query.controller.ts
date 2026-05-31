@@ -67,7 +67,9 @@ export class EventQueryController {
     @CurrentUser() user: AuthUser,
   ): Promise<SearchEventsResponseDTO> {
     this.logger.log(`gRPC: Searching events with term: ${data.searchTerm}, user: ${user.id}`);
-    const entities = await this.eventService.search(data.searchTerm);
+    const entities = !data.searchTerm
+      ? await this.eventService.findAll()
+      : await this.eventService.search(data.searchTerm);
     const events = entities.map((e) => this.eventTransformer.toEventDTO(e));
     return { events, totalCount: events.length };
   }
