@@ -3,8 +3,5 @@
   "logger": {
     "level": "error",
     "format": "text"
-  },
-  "geocoding": {
-    "skipInTestEnv": true
   }
 }

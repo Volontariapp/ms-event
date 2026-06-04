@@ -24,7 +24,6 @@
   },
   "geocoding": {
     "googleMapsApiKey": "default_api_key_here",
-    "skipInTestEnv": false,
     "osmUserAgent": "volontariapp/1.0"
   },
   "port": 3003

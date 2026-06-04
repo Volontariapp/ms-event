@@ -10,6 +10,7 @@ import {
   GoogleMapsStrategy,
   OpenStreetMapStrategy,
 } from '@volontariapp/domain-event';
+import { NodeEnv } from '@volontariapp/config';
 import { AppConfigService } from '../../config/app-config.service.js';
 import { EventCommandController } from './controllers/commands/event.command.controller.js';
 import { EventQueryController } from './controllers/queries/event.query.controller.js';
@@ -41,7 +42,7 @@ import { SocialParticipationQueryClientService } from './clients/social-particip
       useFactory: (appConfigService: AppConfigService) => {
         const apiKey: string = appConfigService.geocoding.googleMapsApiKey;
         const userAgent: string = appConfigService.geocoding.osmUserAgent;
-        const skipInTestEnv: boolean = appConfigService.geocoding.skipInTestEnv;
+        const skipInTestEnv: boolean = appConfigService.config.nodeEnv === NodeEnv.TEST;
 
         const primaryStrategy: OpenStreetMapStrategy = new OpenStreetMapStrategy(
           userAgent,

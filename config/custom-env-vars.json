@@ -28,11 +28,7 @@
   },
   "geocoding": {
     "googleMapsApiKey": "GEOCODING_GOOGLE_MAPS_API_KEY",
-    "osmUserAgent": "GEOCODING_OSM_USER_AGENT",
-    "skipInTestEnv": {
-      "__name": "GEOCODING_SKIP_IN_TEST_ENV",
-      "__format": "json"
-    }
+    "osmUserAgent": "GEOCODING_OSM_USER_AGENT"
   },
   "port": "PORT"
 }
