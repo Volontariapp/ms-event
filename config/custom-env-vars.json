@@ -26,5 +26,10 @@
     "msSocialUrl": "MS_SOCIAL_URL",
     "msWsUrl": "MS_WS_URL"
   },
+  "geocoding": {
+    "googleMapsApiKey": "GEOCODING_GOOGLE_MAPS_API_KEY",
+    "osmUserAgent": "GEOCODING_OSM_USER_AGENT",
+    "skipInTestEnv": "GEOCODING_SKIP_IN_TEST_ENV"
+  },
   "port": "PORT"
 }

@@ -36,8 +36,10 @@ export abstract class BaseCommandController {
         error,
       );
 
-      const repo = new JobsOutboxRepository<K>(this.dataSource.getRepository(JobsOutboxModel));
-      const job = JobsOutboxEntity.createJob<K>({
+      const repo: JobsOutboxRepository<K> = new JobsOutboxRepository<K>(
+        this.dataSource.getRepository(JobsOutboxModel),
+      );
+      const job: JobsOutboxEntity<K> = JobsOutboxEntity.createJob<K>({
         type: jobType,
         emitter: 'ms-event',
         emitterId: userId,
@@ -45,7 +47,7 @@ export abstract class BaseCommandController {
         // @ts-expect-error TS cannot narrow conditional generic types (JobPayload<K>) dynamically
         payload: { userId, payload },
       });
-      await repo.create(job);
+      await repo.create(job as Parameters<typeof repo.create>[0]);
       this.logger.log(`Fallback job ${job.id} created successfully.`);
       throw FALLBACK_ACTIVATED(
         String(jobType),
