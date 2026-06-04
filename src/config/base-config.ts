@@ -1,5 +1,5 @@
 import { BackendConfig, PostgresConfig, MSURLsConfig } from '@volontariapp/config';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { IsDefined, ValidateNested } from 'class-validator';
 
 export class GeocodingConfig {
@@ -12,7 +12,10 @@ export class GeocodingConfig {
   declare osmUserAgent: string;
 
   @IsDefined()
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+  })
   declare skipInTestEnv: boolean;
 }
 
