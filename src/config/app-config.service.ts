@@ -17,4 +17,8 @@ export class AppConfigService {
   get msSocial() {
     return this.config.microServices.msSocialUrl;
   }
+
+  get geocoding() {
+    return this.config.geocoding;
+  }
 }

@@ -6,7 +6,11 @@ import {
   PostgresEventRepository,
   PostgresTagRepository,
   PostgresRequirementRepository,
+  GeocodingService,
+  GoogleMapsStrategy,
+  OpenStreetMapStrategy,
 } from '@volontariapp/domain-event';
+import { AppConfigService } from '../../config/app-config.service.js';
 import { EventCommandController } from './controllers/commands/event.command.controller.js';
 import { EventQueryController } from './controllers/queries/event.query.controller.js';
 import { TagCommandController } from './controllers/commands/tag.command.controller.js';
@@ -32,7 +36,30 @@ import { SocialParticipationQueryClientService } from './clients/social-particip
     RequirementTransformer,
     EventTransformer,
     SocialParticipationQueryClientService,
+    {
+      provide: GeocodingService,
+      useFactory: (appConfigService: AppConfigService) => {
+        const apiKey: string = appConfigService.geocoding.googleMapsApiKey;
+        const userAgent: string = appConfigService.geocoding.osmUserAgent;
+        const skipInTestEnv: boolean = appConfigService.geocoding.skipInTestEnv;
+
+        const primaryStrategy: OpenStreetMapStrategy = new OpenStreetMapStrategy(
+          userAgent,
+          skipInTestEnv,
+        );
+        const fallbackStrategy: GoogleMapsStrategy = new GoogleMapsStrategy(apiKey, skipInTestEnv);
+
+        return new GeocodingService(primaryStrategy, fallbackStrategy);
+      },
+      inject: [AppConfigService],
+    },
   ],
-  exports: [EventService, TagService, RequirementService, SocialParticipationQueryClientService],
+  exports: [
+    EventService,
+    TagService,
+    RequirementService,
+    SocialParticipationQueryClientService,
+    GeocodingService,
+  ],
 })
 export class EventModule {}
