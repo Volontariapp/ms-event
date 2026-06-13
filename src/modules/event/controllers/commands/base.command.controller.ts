@@ -43,6 +43,7 @@ export abstract class BaseCommandController {
         type: jobType,
         emitter: 'ms-event',
         emitterId: userId,
+        scheduledAt: new Date(Date.now()),
         target: EventsQueue.FALLBACK_EVENTS,
         // @ts-expect-error TS cannot narrow conditional generic types (JobPayload<K>) dynamically
         payload: { userId, payload },
