@@ -99,14 +99,18 @@ export class EventQueryController {
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
-    const ids = await this.socialParticipationClient.getUserCreatedEvents(token, limit, page);
+    const { ids, totalCount } = await this.socialParticipationClient.getUserCreatedEvents(
+      token,
+      limit,
+      page,
+    );
 
     const eventsEntities = await Promise.all(
       ids.map((id) => this.eventService.findById(id).catch(() => null)),
     );
     const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount: events.length };
+    return { events, totalCount };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserParticipatedEvents')
@@ -119,14 +123,18 @@ export class EventQueryController {
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
-    const ids = await this.socialParticipationClient.getUserParticipatedEvents(token, limit, page);
+    const { ids, totalCount } = await this.socialParticipationClient.getUserParticipatedEvents(
+      token,
+      limit,
+      page,
+    );
 
     const eventsEntities = await Promise.all(
       ids.map((id) => this.eventService.findById(id).catch(() => null)),
     );
     const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount: events.length };
+    return { events, totalCount };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserWishedEvents')
@@ -139,13 +147,17 @@ export class EventQueryController {
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
-    const ids = await this.socialParticipationClient.getUserWishedEvents(token, limit, page);
+    const { ids, totalCount } = await this.socialParticipationClient.getUserWishedEvents(
+      token,
+      limit,
+      page,
+    );
 
     const eventsEntities = await Promise.all(
       ids.map((id) => this.eventService.findById(id).catch(() => null)),
     );
     const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount: events.length };
+    return { events, totalCount };
   }
 }

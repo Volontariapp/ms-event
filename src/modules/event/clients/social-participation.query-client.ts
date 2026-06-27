@@ -42,7 +42,11 @@ export class SocialParticipationQueryClientService implements OnModuleInit {
     this.logger.log('SocialParticipationQueryClientService initialized');
   }
 
-  async getUserCreatedEvents(token: string, limit = 10, page = 1): Promise<string[]> {
+  async getUserCreatedEvents(
+    token: string,
+    limit = 10,
+    page = 1,
+  ): Promise<{ ids: string[]; totalCount: number }> {
     this.logger.debug(
       `Calling getUserCreatedEvents with limit=${String(limit)}, page=${String(page)}`,
     );
@@ -56,10 +60,14 @@ export class SocialParticipationQueryClientService implements OnModuleInit {
     const response: GetUserEventResponse = await firstValueFrom(
       this.queryService.getUserEvent(request, outboundMetadata),
     );
-    return response.ids;
+    return { ids: response.ids, totalCount: response.pagination?.total ?? response.ids.length };
   }
 
-  async getUserParticipatedEvents(token: string, limit = 10, page = 1): Promise<string[]> {
+  async getUserParticipatedEvents(
+    token: string,
+    limit = 10,
+    page = 1,
+  ): Promise<{ ids: string[]; totalCount: number }> {
     this.logger.debug(
       `Calling getUserParticipatedEvents with limit=${String(limit)}, page=${String(page)}`,
     );
@@ -73,10 +81,14 @@ export class SocialParticipationQueryClientService implements OnModuleInit {
     const response: GetUserParticipateEventResponse = await firstValueFrom(
       this.queryService.getUserParticipateEvent(request, outboundMetadata),
     );
-    return response.ids;
+    return { ids: response.ids, totalCount: response.pagination?.total ?? response.ids.length };
   }
 
-  async getUserWishedEvents(token: string, limit = 10, page = 1): Promise<string[]> {
+  async getUserWishedEvents(
+    token: string,
+    limit = 10,
+    page = 1,
+  ): Promise<{ ids: string[]; totalCount: number }> {
     this.logger.debug(
       `Calling getUserWishedEvents with limit=${String(limit)}, page=${String(page)}`,
     );
@@ -90,6 +102,6 @@ export class SocialParticipationQueryClientService implements OnModuleInit {
     const response: GetUserWishEventResponse = await firstValueFrom(
       this.queryService.getUserWishEvent(request, outboundMetadata),
     );
-    return response.ids;
+    return { ids: response.ids, totalCount: response.pagination?.total ?? response.ids.length };
   }
 }
