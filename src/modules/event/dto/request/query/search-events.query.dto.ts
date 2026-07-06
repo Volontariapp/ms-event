@@ -9,7 +9,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { SearchEventsQuery, EventType, GeoCircle } from '@volontariapp/contracts-nest';
+import { SearchEventsQuery, EventType, GeoCircle, EventState } from '@volontariapp/contracts-nest';
 import { PointDTO } from '../../common/point.dto.js';
 
 export class GeoCircleDTO implements GeoCircle {
@@ -48,4 +48,33 @@ export class SearchEventsQueryDTO implements SearchEventsQuery {
   @IsUUID()
   @IsOptional()
   organizerId!: string;
+
+  @IsUUID(4, { each: true })
+  @IsOptional()
+  ids!: string[];
+
+  @IsUUID(4, { each: true })
+  @IsOptional()
+  excludedIds!: string[];
+
+  @IsString()
+  @IsOptional()
+  startDateFrom?: string;
+
+  @IsString()
+  @IsOptional()
+  startDateTo?: string;
+
+  @IsArray()
+  @IsEnum(EventState, { each: true })
+  @IsOptional()
+  statuses!: EventState[];
+
+  @IsOptional()
+  pagination:
+    | {
+        page: number;
+        limit: number;
+      }
+    | undefined;
 }
