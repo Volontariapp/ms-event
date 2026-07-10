@@ -7,7 +7,7 @@ import type {
   GetUserParticipatedEventsQuery,
   GetUserWishedEventsQuery,
 } from '@volontariapp/contracts-nest';
-import { EventService } from '@volontariapp/domain-event';
+import { EventService, SearchAdvancedVO } from '@volontariapp/domain-event';
 import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import { SearchEventsQueryDTO } from '../../dto/request/query/search-events.query.dto.js';
 import {
@@ -66,12 +66,34 @@ export class EventQueryController {
     @Payload() data: SearchEventsQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<SearchEventsResponseDTO> {
-    this.logger.log(`gRPC: Searching events with term: ${data.searchTerm}, user: ${user.id}`);
-    const entities = !data.searchTerm
-      ? await this.eventService.findAll()
-      : await this.eventService.search(data.searchTerm);
-    const events = entities.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount: events.length };
+    this.logger.log(`gRPC: Searching events advanced, user: ${user.id}`);
+
+    const searchVO = new SearchAdvancedVO(
+      data.area
+        ? {
+            lat: data.area.center.latitude,
+            lng: data.area.center.longitude,
+            radiusInMeters: data.area.radiusMeters,
+          }
+        : undefined,
+      data.types,
+      data.tagSlugs,
+      data.onlyAvailable,
+      data.searchTerm,
+      data.organizerId,
+      data.ids,
+      data.excludedIds,
+      data.startDateFrom ? new Date(data.startDateFrom) : undefined,
+      data.startDateTo ? new Date(data.startDateTo) : undefined,
+      data.statuses,
+      data.pagination?.page,
+      data.pagination?.limit,
+    );
+
+    const paginatedEvents = await this.eventService.searchAdvanced(searchVO);
+    const events = paginatedEvents.events.map((e) => this.eventTransformer.toEventDTO(e));
+
+    return { events, totalCount: paginatedEvents.total };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.LIST_REQUIREMENTS)
@@ -99,14 +121,18 @@ export class EventQueryController {
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
-    const ids = await this.socialParticipationClient.getUserCreatedEvents(token, limit, page);
+    const { ids, totalCount } = await this.socialParticipationClient.getUserCreatedEvents(
+      token,
+      limit,
+      page,
+    );
 
     const eventsEntities = await Promise.all(
       ids.map((id) => this.eventService.findById(id).catch(() => null)),
     );
     const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount: events.length };
+    return { events, totalCount };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserParticipatedEvents')
@@ -119,14 +145,18 @@ export class EventQueryController {
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
-    const ids = await this.socialParticipationClient.getUserParticipatedEvents(token, limit, page);
+    const { ids, totalCount } = await this.socialParticipationClient.getUserParticipatedEvents(
+      token,
+      limit,
+      page,
+    );
 
     const eventsEntities = await Promise.all(
       ids.map((id) => this.eventService.findById(id).catch(() => null)),
     );
     const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount: events.length };
+    return { events, totalCount };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserWishedEvents')
@@ -139,13 +169,17 @@ export class EventQueryController {
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
-    const ids = await this.socialParticipationClient.getUserWishedEvents(token, limit, page);
+    const { ids, totalCount } = await this.socialParticipationClient.getUserWishedEvents(
+      token,
+      limit,
+      page,
+    );
 
     const eventsEntities = await Promise.all(
       ids.map((id) => this.eventService.findById(id).catch(() => null)),
     );
     const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount: events.length };
+    return { events, totalCount };
   }
 }
