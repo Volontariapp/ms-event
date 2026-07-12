@@ -55,7 +55,7 @@ export class EventCommandController extends BaseCommandController {
   ): Promise<UpdateEventResponseDTO> {
     return this.withFallback(JobMessagingType.FALLBACK_UPDATE_EVENT, user.id, data, async () => {
       this.logger.log(`gRPC: Updating event with id: ${data.id}, user: ${user.id}`);
-      const partial = this.eventTransformer.fromEventDTO(data.event);
+      const partial = this.eventTransformer.fromEventDTO(data.event, data.updateMask);
       this.logger.debug(`gRPC: Updating event payload: ${JSON.stringify(partial)}`);
       const entity = await this.eventService.update(data.id, partial);
       return { event: this.eventTransformer.toEventDTO(entity) };

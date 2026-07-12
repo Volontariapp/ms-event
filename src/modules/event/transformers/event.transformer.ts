@@ -60,15 +60,24 @@ export class EventTransformer {
 
   /**
    * UpdateEventCommand → Partial<EventEntity>
+   *
+   * `updateMask` is the source of truth for which fields the client intends
+   * to change. Non-optional scalar/enum fields on the `Event` proto message
+   * (state, type, awardedImpactScore, maxParticipants, title, description,
+   * localisationName) always decode to their zero-value when the client
+   * omits them, so an `!== undefined` check alone can't tell "not sent" from
+   * "explicitly set to the zero value" — it would silently wipe those fields
+   * on every partial update. Gating on the mask avoids that.
    */
-  fromEventDTO(dto: Partial<Event>): Partial<EventEntity> {
+  fromEventDTO(dto: Partial<Event>, updateMask: string[]): Partial<EventEntity> {
     const entity = new EventEntity();
+    const has = (field: string) => updateMask.includes(field);
 
     if (dto.id !== undefined && dto.id !== '') entity.id = dto.id;
-    if (dto.title !== undefined) entity.name = dto.title;
-    if (dto.description !== undefined) entity.description = dto.description;
+    if (has('title') && dto.title !== undefined) entity.name = dto.title;
+    if (has('description') && dto.description !== undefined) entity.description = dto.description;
 
-    if (dto.startAt) {
+    if (has('startAt') && dto.startAt) {
       const startAt = GrpcDateMapper.toDate(dto.startAt);
       if (!startAt) {
         throw INVALID_DATE_PARAMETERS('startAt is invalid');
@@ -76,7 +85,7 @@ export class EventTransformer {
       entity.startAt = startAt;
     }
 
-    if (dto.endAt) {
+    if (has('endAt') && dto.endAt) {
       const endAt = GrpcDateMapper.toDate(dto.endAt);
       if (!endAt) {
         throw INVALID_DATE_PARAMETERS('endAt is invalid');
@@ -84,24 +93,28 @@ export class EventTransformer {
       entity.endAt = endAt;
     }
 
-    if (dto.location) {
+    if (has('location') && dto.location) {
       entity.location = new EventLocation(dto.location.latitude, dto.location.longitude);
     }
 
-    if (dto.type !== undefined) entity.type = dto.type;
-    if (dto.state !== undefined) entity.state = dto.state;
-    if (dto.awardedImpactScore !== undefined) {
+    if (has('localisationName') && dto.localisationName !== undefined) {
+      entity.localisationName = dto.localisationName;
+    }
+
+    if (has('type') && dto.type !== undefined) entity.type = dto.type;
+    if (has('state') && dto.state !== undefined) entity.state = dto.state;
+    if (has('awardedImpactScore') && dto.awardedImpactScore !== undefined) {
       entity.awardedImpactScore = dto.awardedImpactScore;
     }
-    if (dto.maxParticipants !== undefined) {
+    if (has('maxParticipants') && dto.maxParticipants !== undefined) {
       entity.maxParticipants = dto.maxParticipants;
     }
 
-    if (dto.organizerId !== undefined) {
+    if (has('organizerId') && dto.organizerId !== undefined) {
       entity.organizerId = dto.organizerId;
     }
 
-    if (dto.tags) entity.tags = dto.tags.map((t) => this.tagTransformer.toEntity(t));
+    if (has('tags') && dto.tags) entity.tags = dto.tags.map((t) => this.tagTransformer.toEntity(t));
 
     return entity;
   }
