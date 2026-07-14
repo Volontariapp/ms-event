@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+import { EventType, EventState } from '@volontariapp/contracts';
 import { Logger } from '@volontariapp/logger';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, EVENT_QUERY_METHODS } from '@volontariapp/contracts-nest';
@@ -68,6 +69,17 @@ export class EventQueryController {
   ): Promise<SearchEventsResponseDTO> {
     this.logger.log(`gRPC: Searching events advanced, user: ${user.id}`);
 
+    const mappedTypes = data.types.map((t) =>
+      typeof t === 'string' ? EventType[t as keyof typeof EventType] : (t as EventType),
+    );
+    const mappedStatuses = data.statuses.map((s) =>
+      typeof s === 'string' ? EventState[s as keyof typeof EventState] : (s as EventState),
+    );
+
+    this.logger.log(
+      `gRPC search payload mappings: mappedTypes=${JSON.stringify(mappedTypes)}, mappedStatuses=${JSON.stringify(mappedStatuses)}`,
+    );
+
     const searchVO = new SearchAdvancedVO(
       data.area
         ? {
@@ -76,7 +88,7 @@ export class EventQueryController {
             radiusInMeters: data.area.radiusMeters,
           }
         : undefined,
-      data.types,
+      mappedTypes,
       data.tagSlugs,
       data.onlyAvailable,
       data.searchTerm,
@@ -85,7 +97,7 @@ export class EventQueryController {
       data.excludedIds,
       data.startDateFrom ? new Date(data.startDateFrom) : undefined,
       data.startDateTo ? new Date(data.startDateTo) : undefined,
-      data.statuses,
+      mappedStatuses,
       data.pagination?.page,
       data.pagination?.limit,
     );
