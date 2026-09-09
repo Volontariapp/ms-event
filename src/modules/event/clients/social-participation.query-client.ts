@@ -60,7 +60,12 @@ export class SocialParticipationQueryClientService implements OnModuleInit {
     const response: GetUserEventResponse = await firstValueFrom(
       this.queryService.getUserEvent(request, outboundMetadata),
     );
-    return { ids: response.ids, totalCount: response.pagination?.total ?? response.ids.length };
+    this.logger.debug(`Received from ms-social: ${JSON.stringify(response)}`);
+    const total = response.pagination?.total;
+    return {
+      ids: response.ids,
+      totalCount: total ? total : response.ids.length,
+    };
   }
 
   async getUserParticipatedEvents(
@@ -81,7 +86,12 @@ export class SocialParticipationQueryClientService implements OnModuleInit {
     const response: GetUserParticipateEventResponse = await firstValueFrom(
       this.queryService.getUserParticipateEvent(request, outboundMetadata),
     );
-    return { ids: response.ids, totalCount: response.pagination?.total ?? response.ids.length };
+    this.logger.debug(`Received from ms-social: ${JSON.stringify(response)}`);
+    const total = response.pagination?.total;
+    return {
+      ids: response.ids,
+      totalCount: total ? total : response.ids.length,
+    };
   }
 
   async getUserWishedEvents(
@@ -102,6 +112,11 @@ export class SocialParticipationQueryClientService implements OnModuleInit {
     const response: GetUserWishEventResponse = await firstValueFrom(
       this.queryService.getUserWishEvent(request, outboundMetadata),
     );
-    return { ids: response.ids, totalCount: response.pagination?.total ?? response.ids.length };
+    this.logger.debug(`Received from ms-social: ${JSON.stringify(response)}`);
+    const total = response.pagination?.total;
+    return {
+      ids: response.ids,
+      totalCount: total ? total : response.ids.length,
+    };
   }
 }
