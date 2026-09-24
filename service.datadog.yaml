@@ -1,0 +1,9 @@
+schema-version: v2.2
+dd-service: ms-event
+team: volontariapp
+application: volontariapp
+description: Microservice gRPC de gestion des événements du bénévolat et inscriptions.
+tier: backend
+type: web
+repos:
+  - url: https://github.com/Volontariapp/ms-event
