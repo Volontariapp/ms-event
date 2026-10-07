@@ -1,4 +1,5 @@
 import type {
+  CoverStatus,
   Event,
   EventState,
   EventType,
@@ -26,4 +27,6 @@ export class EventDTO implements Event {
   state!: EventState;
   createdAt!: TimestampDTO;
   updatedAt!: TimestampDTO;
+  coverFileId?: string | undefined;
+  coverStatus!: CoverStatus;
 }

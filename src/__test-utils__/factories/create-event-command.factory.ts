@@ -18,6 +18,7 @@ export class CreateEventCommandFactory {
       awardedImpactScore: 10,
       maxParticipants: 50,
       tagIds: [],
+      idempotencyKey: 'test-idempotency-key',
       ...overrides,
     };
   }

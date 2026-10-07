@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsEnum,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -46,4 +47,12 @@ export class CreateEventCommandDTO implements CreateEventCommand {
   @IsArray()
   @IsUUID('all', { each: true })
   tagIds!: string[];
+
+  @IsOptional()
+  @IsUUID()
+  coverFileId?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  idempotencyKey!: string;
 }

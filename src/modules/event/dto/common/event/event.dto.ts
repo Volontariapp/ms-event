@@ -1,4 +1,4 @@
-import { Event, EventState, EventType } from '@volontariapp/contracts-nest';
+import { CoverStatus, Event, EventState, EventType } from '@volontariapp/contracts-nest';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -79,4 +79,11 @@ export class EventDTO implements Event {
   @ValidateNested()
   @Type(() => TimestampDTO)
   updatedAt: TimestampDTO | undefined;
+
+  @IsOptional()
+  @IsUUID()
+  coverFileId?: string;
+
+  @IsEnum(CoverStatus)
+  coverStatus!: CoverStatus;
 }
