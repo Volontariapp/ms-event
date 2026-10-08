@@ -19,6 +19,7 @@ import {
 } from '../../dto/response/event.response.dto.js';
 import { EventTransformer } from '../../transformers/index.js';
 import { JobMessagingType } from '@volontariapp/messaging';
+import { UserRoles } from '@volontariapp/shared';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BaseCommandController } from './base.command.controller.js';
@@ -73,7 +74,15 @@ export class EventCommandController extends BaseCommandController {
       data,
       async () => {
         this.logger.log(`gRPC: Changing state for event with id: ${data.id}, user: ${user.id}`);
-        const entity = await this.eventService.changeState(data.id, data.newState);
+        const userRole = Object.values(UserRoles).includes(user.role as UserRoles)
+          ? (user.role as UserRoles)
+          : undefined;
+        const entity = await this.eventService.changeState(
+          data.id,
+          data.newState,
+          user.id,
+          userRole,
+        );
         return { event: this.eventTransformer.toEventDTO(entity) };
       },
     );

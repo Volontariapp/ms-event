@@ -99,7 +99,12 @@ describe('EventCommandController (Unit)', () => {
 
       expect(result).toEqual({ event: responseDto });
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventService.changeState).toHaveBeenCalledWith(dto.id, dto.newState);
+      expect(eventService.changeState).toHaveBeenCalledWith(
+        dto.id,
+        dto.newState,
+        user.id,
+        user.role,
+      );
     });
   });
 
