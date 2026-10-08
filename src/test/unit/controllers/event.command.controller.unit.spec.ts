@@ -10,6 +10,7 @@ import { JobsOutboxModel } from '@volontariapp/database';
 import { JobsOutboxRepository } from '@volontariapp/outbox';
 import { EventsJobType } from '@volontariapp/messaging';
 import { NotFoundError, PartialContentError } from '@volontariapp/errors';
+import { UserRoles } from '@volontariapp/shared';
 
 describe('EventCommandController (Unit)', () => {
   let controller: EventCommandController;
@@ -103,7 +104,7 @@ describe('EventCommandController (Unit)', () => {
         dto.id,
         dto.newState,
         user.id,
-        user.role,
+        UserRoles.VOLUNTEER,
       );
     });
   });
