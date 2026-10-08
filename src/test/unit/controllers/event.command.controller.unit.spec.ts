@@ -10,6 +10,7 @@ import { JobsOutboxModel } from '@volontariapp/database';
 import { JobsOutboxRepository } from '@volontariapp/outbox';
 import { EventsJobType } from '@volontariapp/messaging';
 import { NotFoundError, PartialContentError } from '@volontariapp/errors';
+import { UserRoles } from '@volontariapp/shared';
 
 describe('EventCommandController (Unit)', () => {
   let controller: EventCommandController;
@@ -99,7 +100,12 @@ describe('EventCommandController (Unit)', () => {
 
       expect(result).toEqual({ event: responseDto });
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventService.changeState).toHaveBeenCalledWith(dto.id, dto.newState);
+      expect(eventService.changeState).toHaveBeenCalledWith(
+        dto.id,
+        dto.newState,
+        user.id,
+        UserRoles.VOLUNTEER,
+      );
     });
   });
 
