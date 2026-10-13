@@ -9,7 +9,7 @@ import type { DataSource } from 'typeorm';
 import { JobsOutboxModel } from '@volontariapp/database';
 import { JobsOutboxRepository } from '@volontariapp/outbox';
 import { EventsJobType } from '@volontariapp/messaging';
-import { NotFoundError, PartialContentError } from '@volontariapp/errors';
+import { ForbiddenError, NotFoundError, PartialContentError } from '@volontariapp/errors';
 import { UserRoles } from '@volontariapp/shared';
 
 describe('EventCommandController (Unit)', () => {
@@ -119,7 +119,17 @@ describe('EventCommandController (Unit)', () => {
 
       expect(result).toEqual({ success: true });
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventService.delete).toHaveBeenCalledWith(dto.id);
+      expect(eventService.delete).toHaveBeenCalledWith(dto.id, user.id, UserRoles.VOLUNTEER);
+    });
+
+    it('should pass an admin role through so the service can skip the ownership check', async () => {
+      const user = AuthUserFactory.admin();
+      eventService.delete.mockResolvedValue(undefined);
+
+      await controller.deleteEvent({ id: 'uuid' }, user);
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(eventService.delete).toHaveBeenCalledWith('uuid', user.id, UserRoles.ADMIN);
     });
   });
 
@@ -156,6 +166,35 @@ describe('EventCommandController (Unit)', () => {
           target: 'fallback-event-queue',
         }),
       );
+    });
+
+    it('should store userId and userRole in the delete fallback job so the replay can re-check ownership', async () => {
+      const user = AuthUserFactory.create();
+      const dto = { id: 'uuid' };
+      eventService.delete.mockRejectedValue(new Error('Unexpected DB Error'));
+
+      await expect(controller.deleteEvent(dto, user)).rejects.toThrow(PartialContentError);
+
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: { userId: user.id, userRole: UserRoles.VOLUNTEER, payload: dto },
+        }),
+      );
+    });
+
+    it('should NOT create a fallback job when the actor is forbidden (403)', async () => {
+      const user = AuthUserFactory.create();
+      const dto = { id: 'uuid' };
+
+      eventService.delete.mockRejectedValue(
+        new ForbiddenError('You are not the organizer of this event'),
+      );
+
+      await expect(controller.deleteEvent(dto, user)).rejects.toThrow(
+        'You are not the organizer of this event',
+      );
+
+      expect(createSpy).not.toHaveBeenCalled();
     });
 
     it('should NOT create a fallback job for Api Errors like 404', async () => {

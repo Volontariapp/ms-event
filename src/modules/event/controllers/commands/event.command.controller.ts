@@ -74,14 +74,11 @@ export class EventCommandController extends BaseCommandController {
       data,
       async () => {
         this.logger.log(`gRPC: Changing state for event with id: ${data.id}, user: ${user.id}`);
-        const userRole = Object.values(UserRoles).includes(user.role as UserRoles)
-          ? (user.role as UserRoles)
-          : undefined;
         const entity = await this.eventService.changeState(
           data.id,
           data.newState,
           user.id,
-          userRole,
+          this.resolveUserRole(user),
         );
         return { event: this.eventTransformer.toEventDTO(entity) };
       },
@@ -144,10 +141,21 @@ export class EventCommandController extends BaseCommandController {
     @Payload() data: DeleteEventCommandDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<DeleteEventResponseDTO> {
-    return this.withFallback(JobMessagingType.FALLBACK_DELETE_EVENT, user.id, data, async () => {
-      this.logger.log(`gRPC: Deleting event with id: ${data.id}, user: ${user.id}`);
-      await this.eventService.delete(data.id);
-      return { success: true };
-    });
+    const userRole = this.resolveUserRole(user) ?? UserRoles.VOLUNTEER;
+    return this.withFallback(
+      JobMessagingType.FALLBACK_DELETE_EVENT,
+      user.id,
+      data,
+      async () => {
+        this.logger.log(`gRPC: Deleting event with id: ${data.id}, user: ${user.id}`);
+        await this.eventService.delete(data.id, user.id, userRole);
+        return { success: true };
+      },
+      { userRole },
+    );
+  }
+
+  private resolveUserRole(user: AuthUser): UserRoles | undefined {
+    return Object.values(UserRoles).find((role) => String(role) === user.role);
   }
 }
