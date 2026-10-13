@@ -17,13 +17,17 @@ export abstract class BaseCommandController {
     userId: string,
     payload: JobRegistry[K] extends { payload: infer P } ? P : never,
     operation: () => Promise<T>,
+    extraPayload?: Omit<JobRegistry[K], 'userId' | 'payload'>,
   ): Promise<T> {
     try {
       return await operation();
     } catch (error: unknown) {
       if (
         isBaseApiError(error) &&
-        (error.statusCode === 404 || error.statusCode === 409 || error.statusCode === 400)
+        (error.statusCode === 400 ||
+          error.statusCode === 403 ||
+          error.statusCode === 404 ||
+          error.statusCode === 409)
       ) {
         this.logger.warn(
           `Operation failed with client error (${String(error.statusCode)}). No fallback job created for ${String(jobType)}.`,
@@ -46,7 +50,7 @@ export abstract class BaseCommandController {
         scheduledAt: new Date(Date.now()),
         target: EventsQueue.FALLBACK_EVENTS,
         // @ts-expect-error TS cannot narrow conditional generic types (JobPayload<K>) dynamically
-        payload: { userId, payload },
+        payload: { userId, payload, ...extraPayload },
       });
       await repo.create(job as Parameters<typeof repo.create>[0]);
       this.logger.log(`Fallback job ${job.id} created successfully.`);
