@@ -24,11 +24,13 @@
     "msPostUrl": "MS_POST_URL",
     "msEventUrl": "MS_EVENT_URL",
     "msSocialUrl": "MS_SOCIAL_URL",
-    "msWsUrl": "MS_WS_URL"
+    "msWsUrl": "MS_WS_URL",
+    "msStorageUrl": "MS_STORAGE_URL"
   },
   "geocoding": {
     "googleMapsApiKey": "GEOCODING_GOOGLE_MAPS_API_KEY",
     "osmUserAgent": "GEOCODING_OSM_USER_AGENT"
   },
-  "port": "PORT"
+  "port": "PORT",
+  "eventIdNamespace": "EVENT_ID_NAMESPACE"
 }

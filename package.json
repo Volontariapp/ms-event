@@ -65,6 +65,7 @@
     "@volontariapp/monitoring": "^2.2.2",
     "@volontariapp/outbox": "^0.10.6",
     "@volontariapp/shared": "^0.14.0",
+    "@volontariapp/storage-client": "^0.2.0",
     "@volontariapp/validation-nest": "^0.1.5",
     "axios": "^1.15.0",
     "class-transformer": "^0.5.1",
@@ -72,7 +73,8 @@
     "joi": "^18.0.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.3.28",
+    "uuid": "^11.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -84,13 +86,14 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
+    "@types/uuid": "^11.0.0",
     "@volontariapp/auth": "^3.3.20",
     "@volontariapp/bridge-nest": "^0.3.20",
     "@volontariapp/config": "^3.3.2",
     "@volontariapp/contracts": "^4.3.16",
     "@volontariapp/contracts-nest": "^3.3.8",
     "@volontariapp/database": "^3.10.2",
-    "@volontariapp/domain-event": "^3.10.9",
+    "@volontariapp/domain-event": "^3.11.0",
     "@volontariapp/errors": "^0.6.5",
     "@volontariapp/errors-nest": "^0.13.5",
     "@volontariapp/eslint-config": "^2.2.5",
@@ -98,7 +101,7 @@
     "@volontariapp/health-check-nest": "^0.1.41",
     "@volontariapp/logger": "^0.4.0",
     "@volontariapp/monitoring": "^2.2.2",
-    "@volontariapp/shared": "^0.14.0",
+    "@volontariapp/shared": "^0.15.0",
     "@volontariapp/validation-nest": "^0.1.5",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -132,28 +135,5 @@
   },
   "engines": {
     "node": ">=24.14.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "moduleNameMapper": {
-      "^(\\.\\.?/.*)\\.js$": "$1"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node",
-    "extensionsToTreatAsEsm": [
-      ".ts"
-    ]
   }
 }

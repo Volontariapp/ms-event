@@ -18,6 +18,14 @@ export class AppConfigService {
     return this.config.microServices.msSocialUrl;
   }
 
+  get msStorageUrl() {
+    return this.config.microServices.msStorageUrl;
+  }
+
+  get eventIdNamespace(): string {
+    return this.config.eventIdNamespace;
+  }
+
   get geocoding() {
     return this.config.geocoding;
   }

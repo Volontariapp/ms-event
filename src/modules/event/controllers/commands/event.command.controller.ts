@@ -1,8 +1,16 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
-import { GRPC_SERVICES, EVENT_COMMAND_METHODS } from '@volontariapp/contracts-nest';
+import {
+  GRPC_SERVICES,
+  EVENT_COMMAND_METHODS,
+  CoverStatus,
+  ScanStatus,
+} from '@volontariapp/contracts-nest';
 import { EventService, RequirementService } from '@volontariapp/domain-event';
 import { REQUIREMENT_NOT_FOUND } from '@volontariapp/errors-nest';
+import { isBaseError } from '@volontariapp/errors';
+import { StorageClientService, isGrpcError } from '@volontariapp/storage-client';
+import { v5 as uuidv5 } from 'uuid';
 import type { AuthUser } from '@volontariapp/auth';
 import { CurrentUser } from '@volontariapp/auth';
 import { CreateEventCommandDTO } from '../../dto/request/command/create-event.command.dto.js';
@@ -23,6 +31,7 @@ import { UserRoles } from '@volontariapp/shared';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BaseCommandController } from './base.command.controller.js';
+import { AppConfigService } from '../../../../config/app-config.service.js';
 
 @Controller()
 export class EventCommandController extends BaseCommandController {
@@ -30,6 +39,8 @@ export class EventCommandController extends BaseCommandController {
     private readonly eventService: EventService,
     private readonly requirementService: RequirementService,
     private readonly eventTransformer: EventTransformer,
+    private readonly storageClientService: StorageClientService,
+    private readonly appConfigService: AppConfigService,
     @InjectDataSource() dataSource: DataSource,
   ) {
     super(dataSource);
@@ -40,13 +51,62 @@ export class EventCommandController extends BaseCommandController {
     @Payload() data: CreateEventCommandDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<CreateEventResponseDTO> {
-    return this.withFallback(JobMessagingType.FALLBACK_CREATE_EVENT, user.id, data, async () => {
-      this.logger.log(`gRPC: Creating event with title: ${data.title}, organizer: ${user.id}`);
-      const entity = await this.eventService.create(
-        this.eventTransformer.fromCreateCommand(data, user.id),
-      );
-      return { event: this.eventTransformer.toEventDTO(entity) };
-    });
+    const eventId = uuidv5(
+      `${user.id}:${data.idempotencyKey}`,
+      this.appConfigService.eventIdNamespace,
+    );
+    this.logger.log(
+      `gRPC: Creating event with id: ${eventId}, title: ${data.title} by organizer: ${user.id}`,
+    );
+
+    let coverStatus = CoverStatus.COVER_STATUS_NONE;
+
+    if (data.coverFileId) {
+      try {
+        const response = await this.storageClientService.confirmEventCoverAttachment(
+          eventId,
+          data.coverFileId,
+        );
+        const file = response.files[0];
+        if (file.scanStatus === ScanStatus.SCAN_STATUS_CLEAN) {
+          coverStatus = CoverStatus.COVER_STATUS_READY;
+        } else {
+          coverStatus = CoverStatus.COVER_STATUS_PENDING;
+        }
+      } catch (error: unknown) {
+        if (this.isStorageUnavailable(error)) {
+          this.logger.warn(
+            `ms-storage unavailable for event ${eventId}, falling back asynchronously with cover_status=PENDING: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+          coverStatus = CoverStatus.COVER_STATUS_PENDING;
+        } else {
+          this.logger.error(
+            `Failed to confirm file attachment for event ${eventId}`,
+            error as Error,
+          );
+          throw error;
+        }
+      }
+    }
+
+    return this.withFallback(
+      JobMessagingType.FALLBACK_CREATE_EVENT,
+      user.id,
+      data,
+      async () => {
+        const eventEntity = this.eventTransformer.fromCreateCommand(data, user.id, eventId);
+        eventEntity.id = eventId;
+        eventEntity.coverStatus = coverStatus;
+        if (data.coverFileId) {
+          eventEntity.coverFileId = data.coverFileId;
+        }
+        const createdEntity = await this.eventService.create(eventEntity);
+        return { event: this.eventTransformer.toEventDTO(createdEntity) };
+      },
+      { eventId },
+    );
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_COMMAND_SERVICE, EVENT_COMMAND_METHODS.UPDATE_EVENT)
@@ -157,5 +217,26 @@ export class EventCommandController extends BaseCommandController {
 
   private resolveUserRole(user: AuthUser): UserRoles | undefined {
     return Object.values(UserRoles).find((role) => String(role) === user.role);
+  }
+
+  private isStorageUnavailable(error: unknown): boolean {
+    if (isBaseError(error)) {
+      if (error.code === 'STORAGE_TIMEOUT') return true;
+      if (error.code === 'STORAGE_ATTACHMENT_FAILED') {
+        const details = error.details as { reason?: string } | undefined;
+        const reason = details?.reason?.toUpperCase() ?? '';
+        if (
+          reason.includes('UNAVAILABLE') ||
+          reason.includes('DEADLINE_EXCEEDED') ||
+          reason.includes('CONNECT ECONNREFUSED')
+        ) {
+          return true;
+        }
+      }
+    }
+    if (isGrpcError(error)) {
+      if (error.code === 14 || error.code === 4) return true;
+    }
+    return false;
   }
 }

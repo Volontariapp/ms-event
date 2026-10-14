@@ -22,10 +22,17 @@ export class EventTransformer {
   /**
    * CreateEventCommandDTO → EventEntity
    */
-  fromCreateCommand(dto: CreateEventCommandDTO, userId: string): EventEntity {
+  fromCreateCommand(dto: CreateEventCommandDTO, userId: string, id?: string): EventEntity {
     const entity = new EventEntity();
 
     this.logger.debug(`Mapping CreateEventCommandDTO: ${JSON.stringify(dto)}`);
+
+    if (id) {
+      entity.id = id;
+    }
+    if (dto.coverFileId) {
+      entity.coverFileId = dto.coverFileId;
+    }
 
     entity.name = dto.title;
     entity.description = dto.description;
@@ -149,6 +156,10 @@ export class EventTransformer {
     dto.organizerId = entity.organizerId;
     dto.createdAt = GrpcDateMapper.toTimestamp(entity.createdAt);
     dto.updatedAt = GrpcDateMapper.toTimestamp(entity.updatedAt);
+    if (entity.coverFileId) {
+      dto.coverFileId = entity.coverFileId;
+    }
+    dto.coverStatus = entity.coverStatus;
     return dto;
   }
 }

@@ -20,11 +20,13 @@
     "msPostUrl": "localhost:5002",
     "msEventUrl": "localhost:5003",
     "msSocialUrl": "localhost:5004",
-    "msWsUrl": "localhost:5005"
+    "msWsUrl": "localhost:5005",
+    "msStorageUrl": "localhost:5006"
   },
   "geocoding": {
     "googleMapsApiKey": "default_api_key_here",
     "osmUserAgent": "volontariapp/1.0"
   },
-  "port": 3003
+  "port": 3003,
+  "eventIdNamespace": "a2d04a60-9d04-4e4b-97e3-0d3f23c7c2b6"
 }
