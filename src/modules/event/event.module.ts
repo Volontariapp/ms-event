@@ -19,18 +19,16 @@ import { TagQueryController } from './controllers/queries/tag.query.controller.j
 import { TagTransformer, RequirementTransformer, EventTransformer } from './transformers/index.js';
 import { SocialParticipationQueryClientService } from './clients/social-participation.query-client.js';
 import { StorageClientModule } from '@volontariapp/storage-client';
+import {
+  StorageClientConfigModule,
+  StorageClientConfigService,
+} from './storage-client-config.module.js';
 
 @Module({
   imports: [
     StorageClientModule.registerAsync({
-      inject: [AppConfigService],
-      useFactory: (rawConfig: unknown) => {
-        const config = rawConfig as AppConfigService;
-        return {
-          url: config.msStorageUrl,
-          timeoutMs: 2000,
-        };
-      },
+      imports: [StorageClientConfigModule],
+      useExisting: StorageClientConfigService,
     }),
   ],
   controllers: [
