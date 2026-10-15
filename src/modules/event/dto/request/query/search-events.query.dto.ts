@@ -49,11 +49,11 @@ export class SearchEventsQueryDTO implements SearchEventsQuery {
   @IsOptional()
   organizerId!: string;
 
-  @IsUUID(4, { each: true })
+  @IsUUID('all', { each: true })
   @IsOptional()
   ids!: string[];
 
-  @IsUUID(4, { each: true })
+  @IsUUID('all', { each: true })
   @IsOptional()
   excludedIds!: string[];
 
