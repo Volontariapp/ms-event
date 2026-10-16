@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
+import { EventState } from '@volontariapp/contracts-nest';
 import { EventTransformer } from './../../../modules/event/transformers/index.js';
 import { TagTransformer } from './../../../modules/event/transformers/tag.transformer.js';
 import { RequirementTransformer } from './../../../modules/event/transformers/requirement.transformer.js';
@@ -79,6 +80,15 @@ describe('EventTransformer with userId', () => {
       expect(entity.tags).toHaveLength(2);
       expect(entity.tags?.[0].id).toBe(tagIds[0]);
       expect(entity.tags?.[1].id).toBe(tagIds[1]);
+    });
+
+    it('should set state to EVENT_STATE_PUBLISHED by default', () => {
+      const userId = randomUUID();
+      const createDto = CreateEventCommandFactory.create();
+
+      const entity = eventTransformer.fromCreateCommand(createDto, userId);
+
+      expect(entity.state).toBe(EventState.EVENT_STATE_PUBLISHED);
     });
   });
 });
