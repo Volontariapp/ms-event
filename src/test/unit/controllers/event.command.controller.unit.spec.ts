@@ -103,7 +103,7 @@ function createMockEvent(overrides: Partial<EventEntity> = {}): EventEntity {
   event.location = overrides.location ?? new EventLocation(48.8566, 2.3522);
   event.localisationName = overrides.localisationName ?? 'Paris';
   event.type = overrides.type ?? EventType.EVENT_TYPE_SOCIAL;
-  event.state = overrides.state ?? EventState.EVENT_STATE_DRAFT;
+  event.state = overrides.state ?? EventState.EVENT_STATE_PUBLISHED;
   event.saga_status = overrides.saga_status ?? SagaStatus.PENDING;
   event.awardedImpactScore = overrides.awardedImpactScore ?? 10;
   event.maxParticipants = overrides.maxParticipants ?? 50;
@@ -128,7 +128,7 @@ function createMockEventProto(overrides: Partial<Event> = {}): Event {
     location: overrides.location ?? { latitude: 48.8566, longitude: 2.3522 },
     localisationName: overrides.localisationName ?? 'Paris',
     type: overrides.type ?? EventType.EVENT_TYPE_SOCIAL,
-    state: overrides.state ?? EventState.EVENT_STATE_DRAFT,
+    state: overrides.state ?? EventState.EVENT_STATE_PUBLISHED,
     awardedImpactScore: overrides.awardedImpactScore ?? 10,
     maxParticipants: overrides.maxParticipants ?? 50,
     currentParticipants: overrides.currentParticipants ?? 0,
@@ -273,12 +273,14 @@ describe('EventCommandController (Unit)', () => {
           id: expectedEventId,
           name: dto.title,
           description: dto.description,
+          state: EventState.EVENT_STATE_PUBLISHED,
           coverStatus: CoverStatus.COVER_STATUS_NONE,
         }),
       );
       expect(result.event).toBeDefined();
       if (!result.event) throw new Error('result.event is undefined');
       expect(result.event.id).toBe(expectedEventId);
+      expect(result.event.state).toBe(EventState.EVENT_STATE_PUBLISHED);
       expect(result.event.coverStatus).toBe(CoverStatus.COVER_STATUS_NONE);
       expect(result.event.coverFileId).toBeUndefined();
     });

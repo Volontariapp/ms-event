@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventEntity, EventLocation, TagEntity } from '@volontariapp/domain-event';
-import type { Event } from '@volontariapp/contracts-nest';
+import { EventState, type Event } from '@volontariapp/contracts-nest';
 import { EventDTO } from '../dto/common/event/event.dto.js';
 import { PointDTO } from '../dto/common/point.dto.js';
 import { CreateEventCommandDTO } from '../dto/request/command/create-event.command.dto.js';
@@ -50,6 +50,7 @@ export class EventTransformer {
     entity.localisationName = dto.localisationName;
 
     entity.type = dto.type;
+    entity.state = EventState.EVENT_STATE_PUBLISHED;
     entity.awardedImpactScore = dto.awardedImpactScore;
     entity.maxParticipants = dto.maxParticipants;
     entity.organizerId = userId;
