@@ -12,7 +12,7 @@ import { isBaseError } from '@volontariapp/errors';
 import { StorageClientService, isGrpcError } from '@volontariapp/storage-client';
 import { v5 as uuidv5 } from 'uuid';
 import type { AuthUser } from '@volontariapp/auth';
-import { CurrentUser } from '@volontariapp/auth';
+import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import { CreateEventCommandDTO } from '../../dto/request/command/create-event.command.dto.js';
 import { UpdateEventCommandDTO } from '../../dto/request/command/update-event.command.dto.js';
 import { ChangeEventStateCommandDTO } from '../../dto/request/command/change-event-state.command.dto.js';
@@ -33,6 +33,12 @@ import { DataSource } from 'typeorm';
 import { BaseCommandController } from './base.command.controller.js';
 import { AppConfigService } from '../../../../config/app-config.service.js';
 
+/** Statut de scan tel que le client gRPC le livre : nombre (types generes) ou nom (`enums: String`). */
+export type ScanStatusOnWire = ScanStatus | keyof typeof ScanStatus;
+
+/** Nom du champ cover dans `update_mask` (camelCase comme les autres champs du masque). */
+const COVER_MASK_FIELD = 'coverFileId';
+
 @Controller()
 export class EventCommandController extends BaseCommandController {
   constructor(
@@ -50,6 +56,7 @@ export class EventCommandController extends BaseCommandController {
   async createEvent(
     @Payload() data: CreateEventCommandDTO,
     @CurrentUser() user: AuthUser,
+    @InternalToken() internalToken?: string,
   ): Promise<CreateEventResponseDTO> {
     const eventId = uuidv5(
       `${user.id}:${data.idempotencyKey}`,
@@ -59,37 +66,9 @@ export class EventCommandController extends BaseCommandController {
       `gRPC: Creating event with id: ${eventId}, title: ${data.title} by organizer: ${user.id}`,
     );
 
-    let coverStatus = CoverStatus.COVER_STATUS_NONE;
-
-    if (data.coverFileId) {
-      try {
-        const response = await this.storageClientService.confirmEventCoverAttachment(
-          eventId,
-          data.coverFileId,
-        );
-        const file = response.files[0];
-        if (file.scanStatus === ScanStatus.SCAN_STATUS_CLEAN) {
-          coverStatus = CoverStatus.COVER_STATUS_READY;
-        } else {
-          coverStatus = CoverStatus.COVER_STATUS_PENDING;
-        }
-      } catch (error: unknown) {
-        if (this.isStorageUnavailable(error)) {
-          this.logger.warn(
-            `ms-storage unavailable for event ${eventId}, falling back asynchronously with cover_status=PENDING: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
-          coverStatus = CoverStatus.COVER_STATUS_PENDING;
-        } else {
-          this.logger.error(
-            `Failed to confirm file attachment for event ${eventId}`,
-            error as Error,
-          );
-          throw error;
-        }
-      }
-    }
+    const coverStatus = data.coverFileId
+      ? await this.reserveCover(eventId, data.coverFileId, internalToken)
+      : CoverStatus.COVER_STATUS_NONE;
 
     return this.withFallback(
       JobMessagingType.FALLBACK_CREATE_EVENT,
@@ -113,12 +92,27 @@ export class EventCommandController extends BaseCommandController {
   async updateEvent(
     @Payload() data: UpdateEventCommandDTO,
     @CurrentUser() user: AuthUser,
+    @InternalToken() internalToken?: string,
   ): Promise<UpdateEventResponseDTO> {
+    const coverChange = this.resolveCoverChange(data);
+    if (coverChange?.fileId) {
+      await this.reserveCover(data.id, coverChange.fileId, internalToken);
+    }
+
     return this.withFallback(JobMessagingType.FALLBACK_UPDATE_EVENT, user.id, data, async () => {
       this.logger.log(`gRPC: Updating event with id: ${data.id}, user: ${user.id}`);
       const partial = this.eventTransformer.fromEventDTO(data.event, data.updateMask);
       this.logger.debug(`gRPC: Updating event payload: ${JSON.stringify(partial)}`);
-      const entity = await this.eventService.update(data.id, partial);
+
+      if (!coverChange) {
+        const entity = await this.eventService.update(data.id, partial);
+        return { event: this.eventTransformer.toEventDTO(entity) };
+      }
+
+      if (data.updateMask.some((field) => field !== COVER_MASK_FIELD)) {
+        await this.eventService.update(data.id, partial);
+      }
+      const entity = await this.eventService.updateCover(data.id, coverChange.fileId, user.id);
       return { event: this.eventTransformer.toEventDTO(entity) };
     });
   }
@@ -213,6 +207,57 @@ export class EventCommandController extends BaseCommandController {
       },
       { userRole },
     );
+  }
+
+  /**
+   * Le masque nomme la photo : un fichier la remplace, l'absence de fichier la supprime.
+   * La photo passe uniquement par `updateCover` (verrou, `event.cover_replaced`), jamais par `update`.
+   */
+  private resolveCoverChange(data: UpdateEventCommandDTO): { fileId: string | null } | undefined {
+    if (!data.updateMask.includes(COVER_MASK_FIELD)) return undefined;
+    return { fileId: data.event.coverFileId ? data.event.coverFileId : null };
+  }
+
+  /**
+   * Reserve la photo aupres de ms-storage avant toute ecriture (et avant `withFallback`).
+   * Une indisponibilite de ms-storage bascule en rattachement asynchrone (PENDING) ;
+   * un refus (404, 422) est relance tel quel et n'ecrit rien.
+   */
+  private async reserveCover(
+    eventId: string,
+    fileId: string,
+    internalToken?: string,
+  ): Promise<CoverStatus> {
+    try {
+      const response = await this.storageClientService.confirmEventCoverAttachment(
+        eventId,
+        fileId,
+        internalToken ? { internalToken } : undefined,
+      );
+      return this.isCleanScan(response.files[0].scanStatus)
+        ? CoverStatus.COVER_STATUS_READY
+        : CoverStatus.COVER_STATUS_PENDING;
+    } catch (error: unknown) {
+      if (this.isStorageUnavailable(error)) {
+        this.logger.warn(
+          `ms-storage unavailable for event ${eventId}, falling back asynchronously with cover_status=PENDING: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+        return CoverStatus.COVER_STATUS_PENDING;
+      }
+      this.logger.error(`Failed to confirm file attachment for event ${eventId}`, error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Le client gRPC charge les proto avec `enums: String` : le statut arrive sous son nom
+   * ('SCAN_STATUS_CLEAN') meme si les types generes le declarent numerique. Les deux formes sont
+   * acceptees ; un statut inconnu n'est jamais pris pour un fichier propre.
+   */
+  private isCleanScan(status: ScanStatusOnWire): boolean {
+    return status === ScanStatus.SCAN_STATUS_CLEAN || status === 'SCAN_STATUS_CLEAN';
   }
 
   private resolveUserRole(user: AuthUser): UserRoles | undefined {

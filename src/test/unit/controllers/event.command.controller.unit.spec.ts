@@ -53,6 +53,7 @@ interface MockEventService {
   changeState: jest.Mock;
   delete: jest.Mock;
   findById: jest.Mock;
+  updateCover: jest.Mock;
 }
 
 interface MockRequirementService {
@@ -91,6 +92,18 @@ function createMockFileMetadata(overrides: Partial<FileMetadata> = {}): FileMeta
     entityType: overrides.entityType,
     entityId: overrides.entityId,
   };
+}
+
+/**
+ * Reponse telle que le client gRPC la decode (`enums: String`) : le statut de scan est un nom
+ * ('SCAN_STATUS_CLEAN'), pas le nombre des types generes.
+ */
+function createOnWireConfirmResponse(
+  fileId: string,
+  scanStatus: ScanStatus | keyof typeof ScanStatus,
+): ConfirmFileAttachmentResponse {
+  const file = Object.assign(createMockFileMetadata({ id: fileId }), { scanStatus });
+  return { success: true, updatedCount: 1, files: [file] };
 }
 
 function createMockEvent(overrides: Partial<EventEntity> = {}): EventEntity {
@@ -188,6 +201,7 @@ describe('EventCommandController (Unit)', () => {
     changeState: jest.fn(),
     delete: jest.fn(),
     findById: jest.fn(),
+    updateCover: jest.fn(),
   };
 
   const mockRequirementService: MockRequirementService = {
@@ -322,7 +336,7 @@ describe('EventCommandController (Unit)', () => {
 
       const result = await controller.createEvent(dto, mockUser);
 
-      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId);
+      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId, undefined);
       expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expectedEventId,
@@ -374,7 +388,7 @@ describe('EventCommandController (Unit)', () => {
 
       const result = await controller.createEvent(dto, mockUser);
 
-      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId);
+      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId, undefined);
       expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expectedEventId,
@@ -412,7 +426,7 @@ describe('EventCommandController (Unit)', () => {
 
       const result = await controller.createEvent(dto, mockUser);
 
-      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId);
+      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId, undefined);
       expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expectedEventId,
@@ -448,7 +462,7 @@ describe('EventCommandController (Unit)', () => {
 
       const result = await controller.createEvent(dto, mockUser);
 
-      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId);
+      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId, undefined);
       expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expectedEventId,
@@ -475,8 +489,55 @@ describe('EventCommandController (Unit)', () => {
       const createSpy = jest.spyOn(eventService, 'create');
 
       await expect(controller.createEvent(dto, mockUser)).rejects.toThrow(NotFoundError);
-      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId);
+      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId, undefined);
       expect(createSpy).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['SCAN_STATUS_CLEAN', CoverStatus.COVER_STATUS_READY],
+      [ScanStatus.SCAN_STATUS_CLEAN, CoverStatus.COVER_STATUS_READY],
+      ['SCAN_STATUS_SCANNING', CoverStatus.COVER_STATUS_PENDING],
+      [ScanStatus.SCAN_STATUS_SCANNING, CoverStatus.COVER_STATUS_PENDING],
+      ['SCAN_STATUS_REJECTED', CoverStatus.COVER_STATUS_PENDING],
+    ] as const)(
+      'should read the scan status %s delivered by the storage client as %s',
+      async (scanStatus, expectedStatus) => {
+        const coverFileId = '77777777-7777-7777-7777-777777777777';
+        const dto = createBaseDto({
+          coverFileId,
+          idempotencyKey: `event-key-wire-${String(scanStatus)}`,
+        });
+        jest
+          .spyOn(storageClientService, 'confirmEventCoverAttachment')
+          .mockResolvedValue(createOnWireConfirmResponse(coverFileId, scanStatus));
+        const createSpy = jest
+          .spyOn(eventService, 'create')
+          .mockResolvedValue(createMockEvent({ organizerId: mockUser.id, coverFileId }));
+
+        await controller.createEvent(dto, mockUser);
+
+        expect(createSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ coverFileId, coverStatus: expectedStatus }),
+        );
+      },
+    );
+
+    it('should forward the internal token to the storage client', async () => {
+      const coverFileId = '88888888-8888-8888-8888-888888888888';
+      const dto = createBaseDto({ coverFileId, idempotencyKey: 'event-key-token' });
+      const expectedEventId = uuidv5(`${mockUser.id}:${dto.idempotencyKey}`, TEST_EVENT_NAMESPACE);
+      const storageSpy = jest
+        .spyOn(storageClientService, 'confirmEventCoverAttachment')
+        .mockResolvedValue(createOnWireConfirmResponse(coverFileId, 'SCAN_STATUS_CLEAN'));
+      jest
+        .spyOn(eventService, 'create')
+        .mockResolvedValue(createMockEvent({ organizerId: mockUser.id, coverFileId }));
+
+      await controller.createEvent(dto, mockUser, 'internal-token');
+
+      expect(storageSpy).toHaveBeenCalledWith(expectedEventId, coverFileId, {
+        internalToken: 'internal-token',
+      });
     });
   });
 
@@ -507,6 +568,137 @@ describe('EventCommandController (Unit)', () => {
       expect(result.event).toBeDefined();
       if (!result.event) throw new Error('result.event is undefined');
       expect(result.event.title).toBe('Updated Gala');
+    });
+
+    describe('cover photo', () => {
+      const eventId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+      const newCoverFileId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+      function createCoverDto(mask: string[], event: Partial<Event> = {}): UpdateEventCommandDTO {
+        return {
+          id: eventId,
+          event: createMockEventProto({ id: eventId, ...event }),
+          updateMask: mask,
+        };
+      }
+
+      it('should reserve the new photo then replace it through updateCover, without the generic update', async () => {
+        const storageSpy = jest
+          .spyOn(storageClientService, 'confirmEventCoverAttachment')
+          .mockResolvedValue(createOnWireConfirmResponse(newCoverFileId, 'SCAN_STATUS_CLEAN'));
+        const updateSpy = jest.spyOn(eventService, 'update');
+        const coverSpy = jest.spyOn(eventService, 'updateCover').mockResolvedValue(
+          createMockEvent({
+            id: eventId,
+            coverFileId: newCoverFileId,
+            coverStatus: CoverStatus.COVER_STATUS_PENDING,
+          }),
+        );
+
+        const result = await controller.updateEvent(
+          createCoverDto(['coverFileId'], { coverFileId: newCoverFileId }),
+          mockUser,
+          'internal-token',
+        );
+
+        expect(storageSpy).toHaveBeenCalledWith(eventId, newCoverFileId, {
+          internalToken: 'internal-token',
+        });
+        expect(coverSpy).toHaveBeenCalledWith(eventId, newCoverFileId, mockUser.id);
+        expect(updateSpy).not.toHaveBeenCalled();
+        expect(result.event?.coverFileId).toBe(newCoverFileId);
+        expect(result.event?.coverStatus).toBe(CoverStatus.COVER_STATUS_PENDING);
+      });
+
+      it('should update the other fields first, then the photo', async () => {
+        jest
+          .spyOn(storageClientService, 'confirmEventCoverAttachment')
+          .mockResolvedValue(createOnWireConfirmResponse(newCoverFileId, 'SCAN_STATUS_CLEAN'));
+        const updateSpy = jest
+          .spyOn(eventService, 'update')
+          .mockResolvedValue(createMockEvent({ id: eventId, name: 'New title' }));
+        const coverSpy = jest
+          .spyOn(eventService, 'updateCover')
+          .mockResolvedValue(
+            createMockEvent({ id: eventId, name: 'New title', coverFileId: newCoverFileId }),
+          );
+
+        await controller.updateEvent(
+          createCoverDto(['title', 'coverFileId'], {
+            title: 'New title',
+            coverFileId: newCoverFileId,
+          }),
+          mockUser,
+        );
+
+        expect(updateSpy).toHaveBeenCalledWith(
+          eventId,
+          expect.objectContaining({ name: 'New title' }),
+        );
+        expect(updateSpy.mock.calls[0]?.[1]).not.toHaveProperty('coverFileId');
+        expect(coverSpy).toHaveBeenCalledWith(eventId, newCoverFileId, mockUser.id);
+      });
+
+      it('should remove the photo without calling storage when the mask names it with no file', async () => {
+        const storageSpy = jest.spyOn(storageClientService, 'confirmEventCoverAttachment');
+        const coverSpy = jest
+          .spyOn(eventService, 'updateCover')
+          .mockResolvedValue(
+            createMockEvent({ id: eventId, coverStatus: CoverStatus.COVER_STATUS_NONE }),
+          );
+
+        await controller.updateEvent(createCoverDto(['coverFileId']), mockUser);
+
+        expect(storageSpy).not.toHaveBeenCalled();
+        expect(coverSpy).toHaveBeenCalledWith(eventId, null, mockUser.id);
+      });
+
+      it('should not touch the photo when the mask does not name it', async () => {
+        const storageSpy = jest.spyOn(storageClientService, 'confirmEventCoverAttachment');
+        const coverSpy = jest.spyOn(eventService, 'updateCover');
+        jest.spyOn(eventService, 'update').mockResolvedValue(createMockEvent({ id: eventId }));
+
+        await controller.updateEvent(
+          createCoverDto(['title'], { title: 'Only title', coverFileId: newCoverFileId }),
+          mockUser,
+        );
+
+        expect(storageSpy).not.toHaveBeenCalled();
+        expect(coverSpy).not.toHaveBeenCalled();
+      });
+
+      it('should still write the photo as PENDING when ms-storage is unavailable', async () => {
+        jest
+          .spyOn(storageClientService, 'confirmEventCoverAttachment')
+          .mockRejectedValue({ code: 14, details: 'Connect Failed' });
+        const coverSpy = jest
+          .spyOn(eventService, 'updateCover')
+          .mockResolvedValue(createMockEvent({ id: eventId, coverFileId: newCoverFileId }));
+
+        await controller.updateEvent(
+          createCoverDto(['coverFileId'], { coverFileId: newCoverFileId }),
+          mockUser,
+        );
+
+        expect(coverSpy).toHaveBeenCalledWith(eventId, newCoverFileId, mockUser.id);
+      });
+
+      it('should write nothing when the reservation is refused', async () => {
+        jest
+          .spyOn(storageClientService, 'confirmEventCoverAttachment')
+          .mockRejectedValue(new NotFoundError(`File ${newCoverFileId} not found`));
+        const coverSpy = jest.spyOn(eventService, 'updateCover');
+        const updateSpy = jest.spyOn(eventService, 'update');
+
+        await expect(
+          controller.updateEvent(
+            createCoverDto(['title', 'coverFileId'], { title: 'T', coverFileId: newCoverFileId }),
+            mockUser,
+          ),
+        ).rejects.toThrow(NotFoundError);
+        expect(coverSpy).not.toHaveBeenCalled();
+        expect(updateSpy).not.toHaveBeenCalled();
+      });
     });
   });
 

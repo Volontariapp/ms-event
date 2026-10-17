@@ -70,6 +70,10 @@ export class UpdateEventDataDTO implements Partial<Event> {
   organizerId?: string;
 
   @IsOptional()
+  @IsUUID()
+  coverFileId?: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TagDTO)
