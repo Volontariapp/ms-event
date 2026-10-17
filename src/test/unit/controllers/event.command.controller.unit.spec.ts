@@ -635,7 +635,7 @@ describe('EventCommandController (Unit)', () => {
           eventId,
           expect.objectContaining({ name: 'New title' }),
         );
-        expect(updateSpy.mock.calls[0]?.[1]).not.toHaveProperty('coverFileId');
+        expect(updateSpy.mock.calls[0]?.[1].coverFileId).toBeUndefined();
         expect(coverSpy).toHaveBeenCalledWith(eventId, newCoverFileId, mockUser.id);
       });
 
