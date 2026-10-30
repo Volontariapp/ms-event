@@ -54,6 +54,7 @@ export class EventTransformer {
     entity.awardedImpactScore = dto.awardedImpactScore;
     entity.maxParticipants = dto.maxParticipants;
     entity.organizerId = userId;
+    entity.scoringVersion = 1;
 
     if (dto.tagIds.length > 0) {
       entity.tags = dto.tagIds.map((id: string) => {
@@ -161,6 +162,9 @@ export class EventTransformer {
       dto.coverFileId = entity.coverFileId;
     }
     dto.coverStatus = entity.coverStatus;
+    if (entity.scoringVersion !== undefined) {
+      dto.scoringVersion = entity.scoringVersion;
+    }
     return dto;
   }
 }

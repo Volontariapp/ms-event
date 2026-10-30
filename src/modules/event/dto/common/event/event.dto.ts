@@ -86,4 +86,8 @@ export class EventDTO implements Event {
 
   @IsEnum(CoverStatus)
   coverStatus!: CoverStatus;
+
+  @IsOptional()
+  @IsNumber()
+  scoringVersion?: number;
 }
