@@ -1,13 +1,19 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { EventState } from '@volontariapp/contracts-nest';
 import { EventTransformer } from './../../../modules/event/transformers/index.js';
 import { TagTransformer } from './../../../modules/event/transformers/tag.transformer.js';
 import { RequirementTransformer } from './../../../modules/event/transformers/requirement.transformer.js';
 import { CreateEventCommandFactory } from '../../../__test-utils__/factories/create-event-command.factory.js';
+import { EventEntityFactory } from '../../../__test-utils__/factories/event-entity.factory.js';
+import { CURRENT_SCORING_VERSION } from '../../../modules/event/event.constants.js';
 import { randomUUID } from 'crypto';
 
 describe('EventTransformer with userId', () => {
   let eventTransformer: EventTransformer;
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
   beforeEach(() => {
     const tagTransformer = new TagTransformer();
@@ -89,6 +95,35 @@ describe('EventTransformer with userId', () => {
       const entity = eventTransformer.fromCreateCommand(createDto, userId);
 
       expect(entity.state).toBe(EventState.EVENT_STATE_PUBLISHED);
+    });
+
+    it('should set scoringVersion to the current scoring version', () => {
+      const entity = eventTransformer.fromCreateCommand(
+        CreateEventCommandFactory.create(),
+        randomUUID(),
+      );
+
+      expect(entity.scoringVersion).toBe(CURRENT_SCORING_VERSION);
+    });
+  });
+
+  describe('toEventDTO scoringVersion', () => {
+    it('should map scoringVersion when set', () => {
+      const entity = EventEntityFactory.create({ scoringVersion: 2 });
+
+      expect(eventTransformer.toEventDTO(entity).scoringVersion).toBe(2);
+    });
+
+    it('should omit scoringVersion when null (legacy rows)', () => {
+      const entity = EventEntityFactory.create({ scoringVersion: null });
+
+      expect(eventTransformer.toEventDTO(entity).scoringVersion).toBeUndefined();
+    });
+
+    it('should omit scoringVersion when undefined', () => {
+      const entity = EventEntityFactory.create({ scoringVersion: undefined });
+
+      expect(eventTransformer.toEventDTO(entity).scoringVersion).toBeUndefined();
     });
   });
 });

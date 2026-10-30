@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventEntity, EventLocation, TagEntity } from '@volontariapp/domain-event';
 import { EventState, type Event } from '@volontariapp/contracts-nest';
+import { CURRENT_SCORING_VERSION } from '../event.constants.js';
 import { EventDTO } from '../dto/common/event/event.dto.js';
 import { PointDTO } from '../dto/common/point.dto.js';
 import { CreateEventCommandDTO } from '../dto/request/command/create-event.command.dto.js';
@@ -54,7 +55,7 @@ export class EventTransformer {
     entity.awardedImpactScore = dto.awardedImpactScore;
     entity.maxParticipants = dto.maxParticipants;
     entity.organizerId = userId;
-    entity.scoringVersion = 1;
+    entity.scoringVersion = CURRENT_SCORING_VERSION;
 
     if (dto.tagIds.length > 0) {
       entity.tags = dto.tagIds.map((id: string) => {
@@ -162,7 +163,7 @@ export class EventTransformer {
       dto.coverFileId = entity.coverFileId;
     }
     dto.coverStatus = entity.coverStatus;
-    if (entity.scoringVersion !== undefined) {
+    if (entity.scoringVersion != null) {
       dto.scoringVersion = entity.scoringVersion;
     }
     return dto;
