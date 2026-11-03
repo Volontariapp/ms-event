@@ -1,4 +1,5 @@
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsEnum,
@@ -11,6 +12,10 @@ import {
 import { Type } from 'class-transformer';
 import { SearchEventsQuery, EventType, GeoCircle, EventState } from '@volontariapp/contracts-nest';
 import { PointDTO } from '../../common/point.dto.js';
+
+// Plafond des listes d'identifiants de SearchEvents : 1000 et non 100, car la gateway y
+// injecte jusqu'a 1000 identifiants d'evenements recommandes (ids) ou a exclure (excludedIds).
+export const MAX_SEARCH_IDS = 1000;
 
 export class GeoCircleDTO implements GeoCircle {
   @ValidateNested()
@@ -49,10 +54,14 @@ export class SearchEventsQueryDTO implements SearchEventsQuery {
   @IsOptional()
   organizerId!: string;
 
+  @IsArray()
+  @ArrayMaxSize(MAX_SEARCH_IDS)
   @IsUUID('all', { each: true })
   @IsOptional()
   ids!: string[];
 
+  @IsArray()
+  @ArrayMaxSize(MAX_SEARCH_IDS)
   @IsUUID('all', { each: true })
   @IsOptional()
   excludedIds!: string[];
