@@ -11,6 +11,7 @@ import type {
   UpdateTagResponse,
   DeleteTagResponse,
   DeleteEventResponse,
+  PaginationResponse,
 } from '@volontariapp/contracts-nest';
 import type { EventDTO } from '../common/event/event.dto.js';
 import type { TagDTO, RequirementDTO } from '../common/common.dto.js';
@@ -43,6 +44,7 @@ export class GetEventResponseDTO implements GetEventResponse {
 export class SearchEventsResponseDTO implements SearchEventsResponse {
   events!: EventDTO[];
   totalCount!: number;
+  pagination: PaginationResponse | undefined;
 }
 
 export class ListRequirementsResponseDTO implements ListRequirementsResponse {

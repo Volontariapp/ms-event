@@ -20,8 +20,13 @@ import {
 } from '../../dto/response/event.response.dto.js';
 import { GetEventsByIdsQueryDTO } from '../../dto/request/query/get-events-by-ids.query.dto.js';
 import { GetEventsByIdsResponseDTO } from '../../dto/response/get-events-by-ids.response.dto.js';
+import {
+  GetUserCreatedEventsResponseDTO,
+  GetUserParticipatedEventsResponseDTO,
+  GetUserWishedEventsResponseDTO,
+} from '../../dto/response/user-events.response.dto.js';
+import { buildPaginationResponse, findEventsInOrder } from '../../utils/events-by-ids.util.js';
 import { EventTransformer, RequirementTransformer } from '../../transformers/index.js';
-import type { EventEntity } from '@volontariapp/domain-event';
 import type { AuthUser } from '@volontariapp/auth';
 import { SocialParticipationQueryClientService } from '../../clients/social-participation.query-client.js';
 
@@ -52,10 +57,7 @@ export class EventQueryController {
     @CurrentUser() user: AuthUser,
   ): Promise<GetEventsByIdsResponseDTO> {
     this.logger.log(`gRPC: Fetching events by ids: ${String(data.ids.length)}, user: ${user.id}`);
-    const eventsEntities = await Promise.all(
-      data.ids.map((id) => this.eventService.findById(id).catch(() => null)),
-    );
-    const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
+    const validEvents = await findEventsInOrder(this.eventService, data.ids);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
     return { events, totalCount: events.length };
   }
@@ -103,7 +105,11 @@ export class EventQueryController {
     const paginatedEvents = await this.eventService.searchAdvanced(searchVO);
     const events = paginatedEvents.events.map((e) => this.eventTransformer.toEventDTO(e));
 
-    return { events, totalCount: paginatedEvents.total };
+    return {
+      events,
+      totalCount: paginatedEvents.total,
+      pagination: paginatedEvents.toPaginationResponse(),
+    };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.LIST_REQUIREMENTS)
@@ -126,7 +132,7 @@ export class EventQueryController {
     @Payload() data: GetUserCreatedEventsQueryDTO,
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
-  ): Promise<GetEventsByIdsResponseDTO> {
+  ): Promise<GetUserCreatedEventsResponseDTO> {
     this.logger.log(`gRPC: Fetching created events for user: ${user.id}`);
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
@@ -137,12 +143,9 @@ export class EventQueryController {
       page,
     );
 
-    const eventsEntities = await Promise.all(
-      ids.map((id) => this.eventService.findById(id).catch(() => null)),
-    );
-    const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
+    const validEvents = await findEventsInOrder(this.eventService, ids);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount };
+    return { events, totalCount, pagination: buildPaginationResponse(totalCount, page, limit) };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserParticipatedEvents')
@@ -150,7 +153,7 @@ export class EventQueryController {
     @Payload() data: GetUserParticipatedEventsQueryDTO,
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
-  ): Promise<GetEventsByIdsResponseDTO> {
+  ): Promise<GetUserParticipatedEventsResponseDTO> {
     this.logger.log(`gRPC: Fetching participated events for user: ${user.id}`);
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
@@ -161,12 +164,9 @@ export class EventQueryController {
       page,
     );
 
-    const eventsEntities = await Promise.all(
-      ids.map((id) => this.eventService.findById(id).catch(() => null)),
-    );
-    const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
+    const validEvents = await findEventsInOrder(this.eventService, ids);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount };
+    return { events, totalCount, pagination: buildPaginationResponse(totalCount, page, limit) };
   }
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserWishedEvents')
@@ -174,7 +174,7 @@ export class EventQueryController {
     @Payload() data: GetUserWishedEventsQueryDTO,
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
-  ): Promise<GetEventsByIdsResponseDTO> {
+  ): Promise<GetUserWishedEventsResponseDTO> {
     this.logger.log(`gRPC: Fetching wished events for user: ${user.id}`);
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
@@ -185,11 +185,8 @@ export class EventQueryController {
       page,
     );
 
-    const eventsEntities = await Promise.all(
-      ids.map((id) => this.eventService.findById(id).catch(() => null)),
-    );
-    const validEvents = eventsEntities.filter((e): e is EventEntity => e !== null);
+    const validEvents = await findEventsInOrder(this.eventService, ids);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
-    return { events, totalCount };
+    return { events, totalCount, pagination: buildPaginationResponse(totalCount, page, limit) };
   }
 }
