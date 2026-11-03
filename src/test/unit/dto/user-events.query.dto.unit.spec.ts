@@ -19,8 +19,8 @@ describe.each(DTO_CLASSES)('%p pagination (Unit)', (DtoClass) => {
   const build = (pagination?: { page: number; limit: number }) =>
     plainToInstance(DtoClass, { pagination });
 
-  it('should expose a plafond of 1000', () => {
-    expect(MAX_PAGINATION_LIMIT).toBe(1000);
+  it('should expose a plafond of 100', () => {
+    expect(MAX_PAGINATION_LIMIT).toBe(100);
   });
 
   it('should accept a missing pagination', async () => {
@@ -29,13 +29,13 @@ describe.each(DTO_CLASSES)('%p pagination (Unit)', (DtoClass) => {
 
   it.each([
     { page: 1, limit: 10 },
-    { page: 1, limit: 1000 },
+    { page: 1, limit: 100 },
   ])('should accept %j', async (pagination) => {
     expect(await validate(build(pagination))).toHaveLength(0);
   });
 
   it.each([
-    { name: 'limit above the plafond', pagination: { page: 1, limit: 1001 } },
+    { name: 'limit above the plafond', pagination: { page: 1, limit: 101 } },
     { name: 'page zero', pagination: { page: 0, limit: 10 } },
     { name: 'limit zero', pagination: { page: 1, limit: 0 } },
     { name: 'non integer limit', pagination: { page: 1, limit: 2.5 } },
