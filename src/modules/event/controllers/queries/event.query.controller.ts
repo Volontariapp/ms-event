@@ -3,17 +3,15 @@ import { EventType, EventState } from '@volontariapp/contracts';
 import { Logger } from '@volontariapp/logger';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { GRPC_SERVICES, EVENT_QUERY_METHODS } from '@volontariapp/contracts-nest';
-import type {
-  GetUserCreatedEventsQuery,
-  GetUserParticipatedEventsQuery,
-  GetUserWishedEventsQuery,
-} from '@volontariapp/contracts-nest';
 import { EventService, SearchAdvancedVO } from '@volontariapp/domain-event';
 import { CurrentUser, InternalToken } from '@volontariapp/auth';
 import { SearchEventsQueryDTO } from '../../dto/request/query/search-events.query.dto.js';
 import {
   GetEventQueryDTO,
   ListRequirementsQueryDTO,
+  GetUserCreatedEventsQueryDTO,
+  GetUserParticipatedEventsQueryDTO,
+  GetUserWishedEventsQueryDTO,
 } from '../../dto/request/query/event.query.dto.js';
 import {
   GetEventResponseDTO,
@@ -125,7 +123,7 @@ export class EventQueryController {
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserCreatedEvents')
   async getUserCreatedEvents(
-    @Payload() data: GetUserCreatedEventsQuery,
+    @Payload() data: GetUserCreatedEventsQueryDTO,
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
   ): Promise<GetEventsByIdsResponseDTO> {
@@ -149,7 +147,7 @@ export class EventQueryController {
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserParticipatedEvents')
   async getUserParticipatedEvents(
-    @Payload() data: GetUserParticipatedEventsQuery,
+    @Payload() data: GetUserParticipatedEventsQueryDTO,
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
   ): Promise<GetEventsByIdsResponseDTO> {
@@ -173,7 +171,7 @@ export class EventQueryController {
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, 'GetUserWishedEvents')
   async getUserWishedEvents(
-    @Payload() data: GetUserWishedEventsQuery,
+    @Payload() data: GetUserWishedEventsQueryDTO,
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
   ): Promise<GetEventsByIdsResponseDTO> {
