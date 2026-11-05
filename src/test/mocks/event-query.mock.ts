@@ -1,18 +1,18 @@
 import { jest } from '@jest/globals';
-import type { PaginatedEventsVO } from '@volontariapp/domain-event';
+import type { PaginatedEventsVO, SearchAdvancedVO } from '@volontariapp/domain-event';
 import type { EventEntity } from '@volontariapp/domain-event';
 import type { EventsBatchLookup } from '../../modules/event/utils/events-by-ids.util.js';
 
 export interface EventServiceQueryMock extends EventsBatchLookup {
   findByIds: jest.Mock<(ids: string[]) => Promise<EventEntity[]>>;
   findById: jest.Mock<(id: string) => Promise<EventEntity>>;
-  searchAdvanced: jest.Mock<() => Promise<PaginatedEventsVO>>;
+  searchAdvanced: jest.Mock<(params: SearchAdvancedVO) => Promise<PaginatedEventsVO>>;
 }
 
 export const createEventServiceQueryMock = (): EventServiceQueryMock => ({
   findByIds: jest.fn<(ids: string[]) => Promise<EventEntity[]>>(),
   findById: jest.fn<(id: string) => Promise<EventEntity>>(),
-  searchAdvanced: jest.fn<() => Promise<PaginatedEventsVO>>(),
+  searchAdvanced: jest.fn<(params: SearchAdvancedVO) => Promise<PaginatedEventsVO>>(),
 });
 
 export interface SocialClientMock {

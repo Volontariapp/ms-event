@@ -84,8 +84,9 @@ describe('EventQueryController (Unit)', () => {
         user,
       );
 
-      const [searchVO] = eventService.searchAdvanced.mock.calls[0];
-      expect(searchVO.excludedOrganizerIds).toEqual(blocked);
+      expect(eventService.searchAdvanced).toHaveBeenCalledWith(
+        expect.objectContaining({ excludedOrganizerIds: blocked }),
+      );
     });
   });
 
