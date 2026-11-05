@@ -26,15 +26,18 @@ describe('GetEventsByIdsQueryDTO caps (Unit)', () => {
   });
 });
 
-describe.each(['ids', 'excludedIds'] as const)('SearchEventsQueryDTO %s cap (Unit)', (field) => {
-  const build = (n: number) => plainToInstance(SearchEventsQueryDTO, { [field]: uuids(n) });
+describe.each(['ids', 'excludedIds', 'excludedOrganizerIds'] as const)(
+  'SearchEventsQueryDTO %s cap (Unit)',
+  (field) => {
+    const build = (n: number) => plainToInstance(SearchEventsQueryDTO, { [field]: uuids(n) });
 
-  it('should accept 1000 ids', async () => {
-    expect(await validate(build(1000))).toHaveLength(0);
-  });
+    it('should accept 1000 ids', async () => {
+      expect(await validate(build(1000))).toHaveLength(0);
+    });
 
-  it('should reject 1001 ids', async () => {
-    const errors = await validate(build(1001));
-    expect(errors.some((e) => e.property === field)).toBe(true);
-  });
-});
+    it('should reject 1001 ids', async () => {
+      const errors = await validate(build(1001));
+      expect(errors.some((e) => e.property === field)).toBe(true);
+    });
+  },
+);
