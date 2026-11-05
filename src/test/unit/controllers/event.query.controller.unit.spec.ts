@@ -74,6 +74,20 @@ describe('EventQueryController (Unit)', () => {
       expect(res.totalCount).toBe(25);
       expect(res.pagination).toEqual({ total: 25, page: 2, limit: 10, totalPages: 3 });
     });
+
+    it('should pass excludedOrganizerIds to the search', async () => {
+      eventService.searchAdvanced.mockResolvedValue(new PaginatedEventsVO([], 0, 1, 10));
+      const blocked = ['11111111-1111-4111-8111-111111111111'];
+
+      await controller.searchEvents(
+        createSearchEventsQueryDTO({ statuses: [], excludedOrganizerIds: blocked }),
+        user,
+      );
+
+      expect(eventService.searchAdvanced).toHaveBeenCalledWith(
+        expect.objectContaining({ excludedOrganizerIds: blocked }),
+      );
+    });
   });
 
   describe.each([

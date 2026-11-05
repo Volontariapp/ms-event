@@ -14,7 +14,8 @@ import { SearchEventsQuery, EventType, GeoCircle, EventState } from '@volontaria
 import { PointDTO } from '../../common/point.dto.js';
 
 // Plafond des listes d'identifiants de SearchEvents : 1000 et non 100, car la gateway y
-// injecte jusqu'a 1000 identifiants d'evenements recommandes (ids) ou a exclure (excludedIds).
+// injecte jusqu'a 1000 identifiants d'evenements recommandes (ids) ou a exclure (excludedIds), et
+// d'organisateurs a exclure (excludedOrganizerIds).
 export const MAX_SEARCH_IDS = 1000;
 
 export class GeoCircleDTO implements GeoCircle {
@@ -65,6 +66,13 @@ export class SearchEventsQueryDTO implements SearchEventsQuery {
   @IsUUID('all', { each: true })
   @IsOptional()
   excludedIds!: string[];
+
+  // Organizers whose events are left out (blocked users, the reader's own events).
+  @IsArray()
+  @ArrayMaxSize(MAX_SEARCH_IDS)
+  @IsUUID('all', { each: true })
+  @IsOptional()
+  excludedOrganizerIds!: string[];
 
   @IsString()
   @IsOptional()

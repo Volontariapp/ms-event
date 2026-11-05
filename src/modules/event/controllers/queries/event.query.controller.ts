@@ -100,6 +100,7 @@ export class EventQueryController {
       mappedStatuses,
       data.pagination?.page,
       data.pagination?.limit,
+      data.excludedOrganizerIds,
     );
 
     const paginatedEvents = await this.eventService.searchAdvanced(searchVO);
