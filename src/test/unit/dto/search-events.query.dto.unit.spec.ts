@@ -40,4 +40,28 @@ describe('SearchEventsQueryDTO (Unit)', () => {
       expect(errors[0].property).toBe('onlyAvailable');
     });
   });
+
+  describe('endAtFrom', () => {
+    it('should accept a valid ISO date string', async () => {
+      const dto = createSearchEventsQueryDTO({ endAtFrom: '2026-11-07T10:00:00.000Z' });
+      const errors = await validate(dto);
+      expect(errors.length).toBe(0);
+    });
+
+    it('should accept an absent value', async () => {
+      const dto = createSearchEventsQueryDTO();
+      expect(dto.endAtFrom).toBeUndefined();
+      const errors = await validate(dto);
+      expect(errors.length).toBe(0);
+    });
+
+    it('should fail if endAtFrom is not an ISO 8601 date', async () => {
+      const dto = createSearchEventsQueryDTO({
+        endAtFrom: 'pas-une-date',
+      });
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].property).toBe('endAtFrom');
+    });
+  });
 });
