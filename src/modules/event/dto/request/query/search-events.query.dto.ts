@@ -3,6 +3,7 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsISO8601,
   IsOptional,
   IsString,
   IsUUID,
@@ -81,6 +82,11 @@ export class SearchEventsQueryDTO implements SearchEventsQuery {
   @IsString()
   @IsOptional()
   startDateTo?: string;
+
+  // Keeps events whose end is at or after this instant (live and upcoming events).
+  @IsISO8601()
+  @IsOptional()
+  endAtFrom?: string;
 
   @IsArray()
   @IsEnum(EventState, { each: true })

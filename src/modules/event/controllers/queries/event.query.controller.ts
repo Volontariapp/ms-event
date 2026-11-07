@@ -101,6 +101,7 @@ export class EventQueryController {
       data.pagination?.page,
       data.pagination?.limit,
       data.excludedOrganizerIds,
+      data.endAtFrom ? new Date(data.endAtFrom) : undefined,
     );
 
     const paginatedEvents = await this.eventService.searchAdvanced(searchVO);

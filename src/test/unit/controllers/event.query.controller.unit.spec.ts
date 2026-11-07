@@ -88,6 +88,39 @@ describe('EventQueryController (Unit)', () => {
         expect.objectContaining({ excludedOrganizerIds: blocked }),
       );
     });
+
+    it('should pass endAtFrom as a Date to the search and leave the other fields unchanged', async () => {
+      eventService.searchAdvanced.mockResolvedValue(new PaginatedEventsVO([], 0, 1, 10));
+      const iso = '2026-11-07T10:00:00.000Z';
+
+      await controller.searchEvents(
+        createSearchEventsQueryDTO({
+          statuses: [],
+          startDateFrom: '2026-11-01T00:00:00.000Z',
+          startDateTo: '2026-11-30T00:00:00.000Z',
+          endAtFrom: iso,
+        }),
+        user,
+      );
+
+      expect(eventService.searchAdvanced).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endAtFrom: new Date(iso),
+          startDateFrom: new Date('2026-11-01T00:00:00.000Z'),
+          startDateTo: new Date('2026-11-30T00:00:00.000Z'),
+        }),
+      );
+    });
+
+    it('should leave endAtFrom undefined when absent', async () => {
+      eventService.searchAdvanced.mockResolvedValue(new PaginatedEventsVO([], 0, 1, 10));
+
+      await controller.searchEvents(createSearchEventsQueryDTO({ statuses: [] }), user);
+
+      expect(eventService.searchAdvanced).toHaveBeenCalledWith(
+        expect.objectContaining({ endAtFrom: undefined }),
+      );
+    });
   });
 
   describe.each([
