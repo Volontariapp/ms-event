@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SearchEventsQuery, EventType, GeoCircle, EventState } from '@volontariapp/contracts-nest';
+import { IsUUIDList } from '../../validators/is-uuid-list.validator.js';
 import { PointDTO } from '../../common/point.dto.js';
 
 // Plafond des listes d'identifiants de SearchEvents : 1000 et non 100, car la gateway y
@@ -58,20 +59,20 @@ export class SearchEventsQueryDTO implements SearchEventsQuery {
 
   @IsArray()
   @ArrayMaxSize(MAX_SEARCH_IDS)
-  @IsUUID('all', { each: true })
+  @IsUUIDList()
   @IsOptional()
   ids!: string[];
 
   @IsArray()
   @ArrayMaxSize(MAX_SEARCH_IDS)
-  @IsUUID('all', { each: true })
+  @IsUUIDList()
   @IsOptional()
   excludedIds!: string[];
 
   // Organizers whose events are left out (blocked users, the reader's own events).
   @IsArray()
   @ArrayMaxSize(MAX_SEARCH_IDS)
-  @IsUUID('all', { each: true })
+  @IsUUIDList()
   @IsOptional()
   excludedOrganizerIds!: string[];
 
