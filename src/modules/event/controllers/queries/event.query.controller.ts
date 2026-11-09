@@ -46,7 +46,7 @@ export class EventQueryController {
     @Payload() data: GetEventQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<GetEventResponseDTO> {
-    this.logger.log(`gRPC: Fetching event with id: ${data.id}, user: ${user.id}`);
+    this.logger.debug(`gRPC: Fetching event with id: ${data.id}, user: ${user.id}`);
     const entity = await this.eventService.findById(data.id);
     return { event: this.eventTransformer.toEventDTO(entity) };
   }
@@ -56,7 +56,7 @@ export class EventQueryController {
     @Payload() data: GetEventsByIdsQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<GetEventsByIdsResponseDTO> {
-    this.logger.log(`gRPC: Fetching events by ids: ${String(data.ids.length)}, user: ${user.id}`);
+    this.logger.debug(`gRPC: Fetching events by ids: ${String(data.ids.length)}, user: ${user.id}`);
     const validEvents = await findEventsInOrder(this.eventService, data.ids);
     const events = validEvents.map((e) => this.eventTransformer.toEventDTO(e));
     return { events, totalCount: events.length };
@@ -67,7 +67,7 @@ export class EventQueryController {
     @Payload() data: SearchEventsQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<SearchEventsResponseDTO> {
-    this.logger.log(`gRPC: Searching events advanced, user: ${user.id}`);
+    this.logger.debug(`gRPC: Searching events advanced, user: ${user.id}`);
 
     const mappedTypes = data.types.map((t) =>
       typeof t === 'string' ? EventType[t as keyof typeof EventType] : (t as EventType),
@@ -76,7 +76,7 @@ export class EventQueryController {
       typeof s === 'string' ? EventState[s as keyof typeof EventState] : (s as EventState),
     );
 
-    this.logger.log(
+    this.logger.debug(
       `gRPC search payload mappings: mappedTypes=${JSON.stringify(mappedTypes)}, mappedStatuses=${JSON.stringify(mappedStatuses)}`,
     );
 
@@ -119,7 +119,7 @@ export class EventQueryController {
     @Payload() data: ListRequirementsQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<ListRequirementsResponseDTO> {
-    this.logger.log(
+    this.logger.debug(
       `gRPC: Listing requirements for event with id: ${data.eventId}, user: ${user.id}`,
     );
     const event = await this.eventService.findById(data.eventId);
@@ -135,7 +135,7 @@ export class EventQueryController {
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
   ): Promise<GetUserCreatedEventsResponseDTO> {
-    this.logger.log(`gRPC: Fetching created events for user: ${user.id}`);
+    this.logger.debug(`gRPC: Fetching created events for user: ${user.id}`);
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
@@ -156,7 +156,7 @@ export class EventQueryController {
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
   ): Promise<GetUserParticipatedEventsResponseDTO> {
-    this.logger.log(`gRPC: Fetching participated events for user: ${user.id}`);
+    this.logger.debug(`gRPC: Fetching participated events for user: ${user.id}`);
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
@@ -177,7 +177,7 @@ export class EventQueryController {
     @CurrentUser() user: AuthUser,
     @InternalToken() token: string,
   ): Promise<GetUserWishedEventsResponseDTO> {
-    this.logger.log(`gRPC: Fetching wished events for user: ${user.id}`);
+    this.logger.debug(`gRPC: Fetching wished events for user: ${user.id}`);
     const page = data.pagination?.page ?? 1;
     const limit = data.pagination?.limit ?? 10;
 
