@@ -18,6 +18,9 @@ import { TagCommandController } from './controllers/commands/tag.command.control
 import { TagQueryController } from './controllers/queries/tag.query.controller.js';
 import { TagTransformer, RequirementTransformer, EventTransformer } from './transformers/index.js';
 import { SocialParticipationQueryClientService } from './clients/social-participation.query-client.js';
+import { EventSearchTotalCache } from './providers/event-search-total-cache.provider.js';
+import { CacheStatsModule } from '../../common/cache/cache-stats.module.js';
+import { CacheStatsReporter } from '../../common/cache/cache-stats.reporter.js';
 import { StorageClientModule } from '@volontariapp/storage-client';
 import {
   StorageClientConfigModule,
@@ -26,6 +29,7 @@ import {
 
 @Module({
   imports: [
+    CacheStatsModule,
     StorageClientModule.registerAsync({
       imports: [StorageClientConfigModule],
       useExisting: StorageClientConfigService,
@@ -48,6 +52,15 @@ import {
     RequirementTransformer,
     EventTransformer,
     SocialParticipationQueryClientService,
+    {
+      provide: EventSearchTotalCache,
+      inject: [CacheStatsReporter],
+      useFactory: (reporter: CacheStatsReporter): EventSearchTotalCache => {
+        const cache = new EventSearchTotalCache();
+        reporter.register(cache);
+        return cache;
+      },
+    },
     {
       provide: GeocodingService,
       useFactory: (appConfigService: AppConfigService) => {

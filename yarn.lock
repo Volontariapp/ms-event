@@ -4325,9 +4325,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/domain-event@npm:^3.16.9":
-  version: 3.16.9
-  resolution: "@volontariapp/domain-event@npm:3.16.9"
+"@volontariapp/domain-event@npm:^3.17.0":
+  version: 3.17.0
+  resolution: "@volontariapp/domain-event@npm:3.17.0"
   dependencies:
     "@nestjs/common": "npm:^11.2.8"
     "@volontariapp/contracts": "npm:4.13.2"
@@ -4339,7 +4339,7 @@ __metadata:
     "@volontariapp/outbox": "npm:0.10.44"
     "@volontariapp/shared": "npm:0.20.0"
     class-transformer: "npm:^0.5.1"
-  checksum: 10c0/233509ad76d98cea4acbf8f548aae8c2e053ae3baddc30369b7998f4b7f2b05c64f4463a4581edaba3b168fcb163e10530e6ca875e3e65355d385b8d47e3129d
+  checksum: 10c0/edb46ee9d28ac471123da9aacb4a964ac4367940dcdf839fc1c1be1c90b3a070b0b4bbe42baad9bc71b7da7a571ab9d6c56a7d0ea4c64d57666930f13342693b
   languageName: node
   linkType: hard
 
@@ -8732,7 +8732,7 @@ __metadata:
     "@volontariapp/contracts": "npm:^4.13.2"
     "@volontariapp/contracts-nest": "npm:^3.5.0"
     "@volontariapp/database": "npm:^3.13.2"
-    "@volontariapp/domain-event": "npm:^3.16.9"
+    "@volontariapp/domain-event": "npm:^3.17.0"
     "@volontariapp/errors": "npm:^0.7.1"
     "@volontariapp/errors-nest": "npm:^0.14.2"
     "@volontariapp/eslint-config": "npm:^2.2.5"
