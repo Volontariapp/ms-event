@@ -23,7 +23,7 @@ export class TagQueryController {
     @Payload() data: GetTagsQueryDTO,
     @CurrentUser() user: AuthUser,
   ): Promise<GetTagsResponseDTO> {
-    this.logger.log(`gRPC: Fetching tags, user: ${user.id}`);
+    this.logger.debug(`gRPC: Fetching tags, user: ${user.id}`);
     const entities =
       data.slugs.length > 0
         ? await Promise.all(data.slugs.map((slug) => this.tagService.findBySlug(slug)))
