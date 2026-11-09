@@ -6,6 +6,7 @@ import type { AuthUser } from '@volontariapp/auth';
 import { UserRoles } from '@volontariapp/shared';
 import { SocialParticipationQueryClientService } from '../../../modules/event/clients/social-participation.query-client.js';
 import { EventQueryController } from '../../../modules/event/controllers/queries/event.query.controller.js';
+import { EventSearchTotalCache } from '../../../modules/event/providers/event-search-total-cache.provider.js';
 import {
   EventTransformer,
   RequirementTransformer,
@@ -39,6 +40,10 @@ describe('EventQueryController (Unit)', () => {
         TagTransformer,
         { provide: EventService, useValue: eventService },
         { provide: SocialParticipationQueryClientService, useValue: social },
+        {
+          provide: EventSearchTotalCache,
+          useFactory: (): EventSearchTotalCache => new EventSearchTotalCache(),
+        },
       ],
     }).compile();
     controller = moduleRef.get(EventQueryController);

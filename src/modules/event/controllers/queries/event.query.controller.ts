@@ -29,6 +29,7 @@ import { buildPaginationResponse, findEventsInOrder } from '../../utils/events-b
 import { EventTransformer, RequirementTransformer } from '../../transformers/index.js';
 import type { AuthUser } from '@volontariapp/auth';
 import { SocialParticipationQueryClientService } from '../../clients/social-participation.query-client.js';
+import { EventSearchTotalCache } from '../../providers/event-search-total-cache.provider.js';
 
 @Controller()
 export class EventQueryController {
@@ -39,6 +40,7 @@ export class EventQueryController {
     private readonly eventTransformer: EventTransformer,
     private readonly requirementTransformer: RequirementTransformer,
     private readonly socialParticipationClient: SocialParticipationQueryClientService,
+    private readonly searchTotalCache: EventSearchTotalCache,
   ) {}
 
   @GrpcMethod(GRPC_SERVICES.EVENT_QUERY_SERVICE, EVENT_QUERY_METHODS.GET_EVENT)
@@ -104,7 +106,19 @@ export class EventQueryController {
       data.endAtFrom ? new Date(data.endAtFrom) : undefined,
     );
 
-    const paginatedEvents = await this.eventService.searchAdvanced(searchVO);
+    // The COUNT is a Seq Scan of events: reuse the total of the same filter for 10 s.
+    const cacheKey = EventSearchTotalCache.buildKey(searchVO);
+    const knownTotal = this.searchTotalCache.get(cacheKey);
+
+    const paginatedEvents =
+      knownTotal === undefined
+        ? await this.eventService.searchAdvanced(searchVO)
+        : await this.eventService.searchAdvanced(searchVO, { knownTotal });
+
+    if (knownTotal === undefined) {
+      this.searchTotalCache.set(cacheKey, paginatedEvents.total);
+    }
+
     const events = paginatedEvents.events.map((e) => this.eventTransformer.toEventDTO(e));
 
     return {
