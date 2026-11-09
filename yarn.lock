@@ -4325,7 +4325,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volontariapp/domain-event@npm:3.17.0":
+"@volontariapp/domain-event@npm:^3.17.0":
   version: 3.17.0
   resolution: "@volontariapp/domain-event@npm:3.17.0"
   dependencies:
@@ -8732,7 +8732,7 @@ __metadata:
     "@volontariapp/contracts": "npm:^4.13.2"
     "@volontariapp/contracts-nest": "npm:^3.5.0"
     "@volontariapp/database": "npm:^3.13.2"
-    "@volontariapp/domain-event": "npm:3.17.0"
+    "@volontariapp/domain-event": "npm:^3.17.0"
     "@volontariapp/errors": "npm:^0.7.1"
     "@volontariapp/errors-nest": "npm:^0.14.2"
     "@volontariapp/eslint-config": "npm:^2.2.5"
